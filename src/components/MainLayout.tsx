@@ -1,8 +1,10 @@
 import Link from "next/link"
 
-import { FaFire } from "react-icons/fa"
 import { Footer } from "@/components/Footer"
+import { IoIosFlame } from "react-icons/io"
+
 import { IconLogo } from "./icons"
+import AddressBlock from "./AddressBlock"
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,16 +15,15 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
           <IconLogo />
         </Link>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 rounded-full bg-wb-violet/20 px-3 py-1.5 text-white">
-            <FaFire className="text-sm text-orange-300" />
-            <span className="text-sm font-semibold">7</span>
+          <div className="flex items-center gap-px rounded-full bg-wb-violet/20 px-3 h-8 text-white">
+            <IoIosFlame className="text-xl text-white" />
+            <span className="text-lg scale-95 font-black">7</span>
           </div>
 
-          <button className="relative w-10 h-10 bg-wb-violet/20 rounded-full flex items-center justify-center">
-            <div className="w-5 h-5 bg-wb-violet rounded-full" />
-            <span className="absolute -top-1 -right-1 w-5 h-5 bg-wb-red rounded-full text-sm flex items-center justify-center text-white font-bold">
-              1
-            </span>
+          <button>
+            <figure className="size-8 rounded-lg overflow-hidden">
+              <AddressBlock name="dww" />
+            </figure>
           </button>
         </div>
       </header>

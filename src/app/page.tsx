@@ -12,7 +12,7 @@ export default function Home() {
 
         <div className="relative">
           {/* Timeline line */}
-          <div className="absolute left-3 top-4 bottom-8 w-0.5 bg-wb-green" />
+          <div className="absolute left-3 rounded-full top-4 bottom-8 w-0.5 bg-wb-green/30" />
 
           {/* Activity Cards */}
           <div className="space-y-4">
@@ -28,7 +28,7 @@ export default function Home() {
                   Question
                 </span>
                 <h3 className="text-slate-900 text-lg font-bold leading-tight pr-24">
-                  What do you remember about the first time you met?
+                  What do you remember about the first time we met?
                 </h3>
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center">
                   <div className="w-10 h-10 bg-rose-300 rounded-full flex items-center justify-center">
