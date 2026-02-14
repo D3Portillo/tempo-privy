@@ -1,19 +1,6 @@
 "use client"
 
-import { alphaUsd } from "@/constants"
 import { PrivyProvider as BasePrivyProvider } from "@privy-io/react-auth"
-import { defineChain } from "viem"
-
-// Define Tempo Moderato chain
-const tempo = defineChain({
-  id: 42431,
-  name: "Tempo Moderato",
-  nativeCurrency: { name: "AlphaUSD", symbol: "aUSD", decimals: 6 },
-  rpcUrls: {
-    default: { http: ["https://rpc.moderato.tempo.xyz"] },
-  },
-  feeToken: alphaUsd,
-})
 
 export function PrivyProvider({ children }: { children: React.ReactNode }) {
   return (
