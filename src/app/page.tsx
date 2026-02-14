@@ -1,29 +1,11 @@
-"use client"
-
-import {
-  FaHome,
-  FaCalendarAlt,
-  FaHeart,
-  FaCheckCircle,
-  FaGift,
-} from "react-icons/fa"
+import { FaCheckCircle } from "react-icons/fa"
+import { MainLayout } from "@/components/MainLayout"
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-slate-900 pb-24">
-      {/* Header */}
-      <header className="flex items-center justify-between p-6">
-        <h1 className="text-3xl font-bold text-white">Home</h1>
-        <button className="relative w-10 h-10 bg-wb-violet/20 rounded-full flex items-center justify-center">
-          <div className="w-5 h-5 bg-wb-violet rounded-full" />
-          <span className="absolute -top-1 -right-1 w-5 h-5 bg-wb-red rounded-full text-sm flex items-center justify-center text-white font-bold">
-            1
-          </span>
-        </button>
-      </header>
-
+    <MainLayout>
       {/* Daily Activities */}
-      <section className="px-6">
+      <section>
         <h2 className="text-2xl font-semibold text-white mb-6">
           Daily Activities
         </h2>
@@ -36,7 +18,7 @@ export default function Home() {
           <div className="space-y-4">
             {/* Question Card */}
             <div className="relative flex gap-4">
-              <div className="relative z-10 flex-shrink-0">
+              <div className="relative z-10 shrink-0">
                 <FaCheckCircle className="w-6 h-6 text-wb-green" />
               </div>
               <div className="flex-1 bg-purple-200 rounded-3xl p-5 relative overflow-hidden">
@@ -62,7 +44,7 @@ export default function Home() {
 
             {/* Quiz Card */}
             <div className="relative flex gap-4">
-              <div className="relative z-10 flex-shrink-0">
+              <div className="relative z-10 shrink-0">
                 <FaCheckCircle className="w-6 h-6 text-wb-green" />
               </div>
               <div className="flex-1 bg-orange-200 rounded-3xl p-5 relative overflow-hidden">
@@ -83,7 +65,7 @@ export default function Home() {
 
             {/* Game Card */}
             <div className="relative flex gap-4">
-              <div className="relative z-10 flex-shrink-0">
+              <div className="relative z-10 shrink-0">
                 <div className="w-6 h-6 rounded-full border-2 border-wb-violet bg-slate-900 flex items-center justify-center">
                   <div className="w-2 h-2 bg-wb-violet rounded-full" />
                 </div>
@@ -109,28 +91,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-indigo-950 px-6 py-3 pb-6">
-        <div className="flex items-center justify-around">
-          <button className="flex flex-col items-center gap-1 text-wb-violet">
-            <FaHome className="text-xl" />
-            <span className="text-sm">Home</span>
-          </button>
-          <button className="flex flex-col items-center gap-1 text-gray-400">
-            <FaGift className="text-xl" />
-            <span className="text-sm">Treats</span>
-          </button>
-          <button className="flex flex-col items-center gap-1 text-gray-400">
-            <FaCalendarAlt className="text-xl" />
-            <span className="text-sm">Timeline</span>
-          </button>
-          <button className="flex flex-col items-center gap-1 text-gray-400">
-            <FaHeart className="text-xl" />
-            <span className="text-sm">Us</span>
-          </button>
-        </div>
-      </nav>
-    </div>
+    </MainLayout>
   )
 }
