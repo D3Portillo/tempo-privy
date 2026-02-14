@@ -1,4 +1,5 @@
 import { alphaUsd } from "@/constants"
+import { tempoActions } from "tempo.ts/viem"
 import { createPublicClient, defineChain, http } from "viem"
 
 /** Tempo Moderato chain  */
@@ -15,4 +16,4 @@ export const tempo = defineChain({
 export const clientTempo = createPublicClient({
   chain: tempo,
   transport: http(),
-})
+}).extend(tempoActions())

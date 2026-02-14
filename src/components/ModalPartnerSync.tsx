@@ -12,11 +12,10 @@ import { atom, useAtom } from "jotai"
 import { BaseModal } from "./BaseModal"
 import Spinner from "./Spinner"
 
-const INVITE_CODE = "WB-AB000000"
-
 const atomModalPartnerSync = atom(false)
 export const useModalPartnerSync = () => useAtom(atomModalPartnerSync)
 
+const DEFAULT_INVITE_CODE = "WB-AB000000"
 export function ModalPartnerSync() {
   const { evmAddress, isConnected } = useAuth()
   const [isOpen, setIsOpen] = useModalPartnerSync()
@@ -37,7 +36,7 @@ export function ModalPartnerSync() {
       revalidateOnReconnect: false,
     },
   )
-  const inviteCode = inviteData?.code || INVITE_CODE
+  const inviteCode = inviteData?.code
 
   const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -50,6 +49,7 @@ export function ModalPartnerSync() {
   }, [])
 
   const handleCopyCode = async () => {
+    if (!inviteCode) return
     await navigator.clipboard.writeText(inviteCode)
 
     setCopiedType("code")
@@ -65,7 +65,6 @@ export function ModalPartnerSync() {
 
   const handleCopyLink = async () => {
     if (!inviteCode) return
-
     const inviteLink = `${window.location.origin}/invite?code=${inviteCode}`
 
     await navigator.clipboard.writeText(inviteLink)
@@ -163,7 +162,9 @@ export function ModalPartnerSync() {
                   YOUR CODE
                 </p>
                 <div className="mt-1 flex items-center justify-between gap-3">
-                  <p className="text-xl font-bold text-white">{inviteCode}</p>
+                  <p className="text-xl font-bold text-white">
+                    {inviteCode || DEFAULT_INVITE_CODE}
+                  </p>
 
                   <button
                     onClick={handleCopyCode}

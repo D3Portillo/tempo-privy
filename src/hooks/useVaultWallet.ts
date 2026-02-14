@@ -3,7 +3,10 @@
 import useSWR from "swr"
 import type { Address } from "viem"
 
-import { getVaultWalletAction } from "@/app/actions/partner"
+import {
+  getVaultWalletAction,
+  redeemVaultBalanceAction,
+} from "@/app/actions/partner"
 import { useAuth } from "@/lib/wallet"
 
 type UseVaultWalletResult = {
@@ -25,9 +28,12 @@ export function useVaultWallet(): UseVaultWalletResult {
 
   const vaultWallet = (data?.vaultWallet || null) as Address | null
 
-  const redeemBalance = async (_amount: bigint) => {
-    void _amount
-    throw new Error("redeemBalance not implemented")
+  const redeemBalance = async (amount: bigint) => {
+    if (!evmAddress) {
+      throw new Error("No active wallet")
+    }
+
+    await redeemVaultBalanceAction(evmAddress, amount.toString())
   }
 
   return {
