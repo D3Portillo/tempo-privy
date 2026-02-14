@@ -1,5 +1,12 @@
 "use client"
 
 export default function Home() {
-  return null
+  return (
+    <section className="p-4">
+      <p>
+        WeBond: Turn daily connection into shared streaks that grow your bond
+        together
+      </p>
+    </section>
+  )
 }

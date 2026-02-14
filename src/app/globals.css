@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
 @theme inline {
+  --color-wb-violet: #d233e6;
+  --color-wb-yellow: #fffd82;
+  --color-wb-green: #aeffd8;
+  --color-wb-red: #ff0022;
 }
 
 /* Interactive elements cursor */
