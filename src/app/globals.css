@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+body,
+html {
+  @apply bg-slate-900;
+}
+
 @theme inline {
   --color-wb-violet: #d233e6;
   --color-wb-yellow: #fffd82;

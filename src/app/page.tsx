@@ -1,16 +1,12 @@
-import { FaCheckCircle, FaChevronRight } from "react-icons/fa"
+import { FaCheckCircle } from "react-icons/fa"
 import { MainLayout } from "@/components/MainLayout"
-import { BsEnvelopeOpenHeartFill } from "react-icons/bs"
+import { InvitePartner } from "@/components/InvitePartner"
 
 export default function Home() {
   return (
     <MainLayout>
       <nav className="mb-6">
-        <button className="rounded-xl text-white w-full px-4 py-3 justify-between bg-linear-to-br from-red-700 to-wb-violet flex items-center">
-          <BsEnvelopeOpenHeartFill className="text-2xl" />
-          <h2>Let's invite your partner</h2>
-          <FaChevronRight />
-        </button>
+        <InvitePartner />
       </nav>
 
       <h2 className="text-2xl font-semibold text-white mb-6">

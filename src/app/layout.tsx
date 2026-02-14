@@ -3,6 +3,7 @@ import "./globals.css"
 
 import { Inter } from "next/font/google"
 import { PrivyProvider } from "@/providers/PrivyProvider"
+import ModalProviders from "@/providers/ModalProviders"
 
 const nextFont = Inter({
   subsets: [],
@@ -24,7 +25,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${nextFont.className} antialiased`}>
-        <PrivyProvider>{children}</PrivyProvider>
+        <PrivyProvider>
+          <ModalProviders>{children}</ModalProviders>
+        </PrivyProvider>
       </body>
     </html>
   )

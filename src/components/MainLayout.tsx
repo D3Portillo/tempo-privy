@@ -10,15 +10,18 @@ import { IoIosFlame } from "react-icons/io"
 import { FiLogOut } from "react-icons/fi"
 import { BsFillArrowThroughHeartFill } from "react-icons/bs"
 
-import { IconLogo } from "./icons"
+import { useModalPartnerSync } from "./ModalPartnerSync"
 import AddressBlock from "./AddressBlock"
+import { IconLogo } from "./icons"
 
 export function MainLayout({ children }: PropsWithChildren) {
+  const [, setIsOpen] = useModalPartnerSync()
+
   const { isConnected, username, login, logout } = useAuth()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-slate-900 pb-24">
+    <div className="mx-auto min-h-screen max-w-2xl pb-24">
       {/* Header */}
       <header className="flex border-b border-white/5 mb-5 items-center justify-between p-6">
         <Link className="w-24 text-white" href="/">
@@ -30,7 +33,7 @@ export function MainLayout({ children }: PropsWithChildren) {
             id="auth-dropdown"
             className="relative flex items-center gap-3"
           >
-            <div className="flex items-center gap-px rounded-full bg-wb-violet/20 px-3 h-8 text-white">
+            <div className="flex items-center gap-px rounded-full bg-wb-red/80 px-3 h-8 text-white">
               <IoIosFlame className="text-xl text-white" />
               <span className="text-lg scale-95 font-black">7</span>
             </div>
@@ -56,7 +59,10 @@ export function MainLayout({ children }: PropsWithChildren) {
 
                 <div className="absolute right-0 top-12 z-11 min-w-44 rounded-2xl border border-white/10 bg-slate-800/95 p-2 shadow-lg backdrop-blur">
                   <button
-                    onClick={() => setIsDropdownOpen(false)}
+                    onClick={() => {
+                      setIsDropdownOpen(false)
+                      setIsOpen(true)
+                    }}
                     className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-white transition hover:bg-white/10"
                   >
                     <BsFillArrowThroughHeartFill className="text-base text-pink-300" />
@@ -88,7 +94,7 @@ export function MainLayout({ children }: PropsWithChildren) {
       </header>
 
       {/* Page Content */}
-      <main className="px-6">{children}</main>
+      <main className="px-6 pb-12">{children}</main>
 
       <Footer />
     </div>
