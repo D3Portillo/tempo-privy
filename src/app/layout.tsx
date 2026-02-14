@@ -1,16 +1,13 @@
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
+
+import { Inter } from "next/font/google"
 import { PrivyProvider } from "@/providers/PrivyProvider"
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const nextFont = Inter({
   subsets: ["latin"],
-})
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  display: "fallback",
 })
 
 export const metadata: Metadata = {
@@ -25,12 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml"></link>
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${nextFont.className} antialiased`}>
         <PrivyProvider>{children}</PrivyProvider>
       </body>
     </html>
