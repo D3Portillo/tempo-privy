@@ -12,14 +12,16 @@ export default function Home() {
 
         <div className="relative">
           {/* Timeline line */}
-          <div className="absolute left-3 top-8 bottom-8 w-0.5 bg-wb-green" />
+          <div className="absolute left-3 top-4 bottom-8 w-0.5 bg-wb-green" />
 
           {/* Activity Cards */}
           <div className="space-y-4">
             {/* Question Card */}
             <div className="relative flex gap-4">
               <div className="relative z-10 shrink-0">
-                <FaCheckCircle className="w-6 h-6 text-wb-green" />
+                <figure className="grid -mt-2 place-items-center p-1 bg-slate-900 w-7 h-10 rounded-full">
+                  <FaCheckCircle className="text-xl text-wb-green" />
+                </figure>
               </div>
               <div className="flex-1 bg-purple-200 rounded-3xl p-5 relative overflow-hidden">
                 <span className="inline-block px-3 py-1 bg-slate-900 text-white text-sm font-medium rounded-full mb-3">
@@ -36,17 +38,17 @@ export default function Home() {
                     K
                   </div>
                 </div>
-                <div className="absolute bottom-3 right-3">
-                  <FaCheckCircle className="w-5 h-5 text-wb-green" />
-                </div>
               </div>
             </div>
 
             {/* Quiz Card */}
             <div className="relative flex gap-4">
               <div className="relative z-10 shrink-0">
-                <FaCheckCircle className="w-6 h-6 text-wb-green" />
+                <figure className="grid -mt-2 place-items-center p-1 bg-slate-900 w-7 h-10 rounded-full">
+                  <FaCheckCircle className="text-xl text-wb-green" />
+                </figure>
               </div>
+
               <div className="flex-1 bg-orange-200 rounded-3xl p-5 relative overflow-hidden">
                 <span className="inline-block px-3 py-1 bg-slate-900 text-white text-sm font-medium rounded-full mb-3">
                   Quiz
@@ -57,19 +59,19 @@ export default function Home() {
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 text-5xl">
                   💝
                 </div>
-                <div className="absolute bottom-3 right-3">
-                  <FaCheckCircle className="w-5 h-5 text-wb-green" />
-                </div>
               </div>
             </div>
 
             {/* Game Card */}
             <div className="relative flex gap-4">
               <div className="relative z-10 shrink-0">
-                <div className="w-6 h-6 rounded-full border-2 border-wb-violet bg-slate-900 flex items-center justify-center">
-                  <div className="w-2 h-2 bg-wb-violet rounded-full" />
-                </div>
+                <figure className="grid -mt-2 place-items-center p-1 bg-slate-900 w-7 h-10 rounded-full">
+                  <div className="size-5 grid place-items-center border-2 border-wb-violet rounded-full">
+                    <div className="bg-wb-violet size-2 rounded-full" />
+                  </div>
+                </figure>
               </div>
+
               <div className="flex-1 bg-yellow-100 rounded-3xl p-5 relative overflow-hidden">
                 <span className="inline-block px-3 py-1 bg-slate-900 text-white text-sm font-medium rounded-full mb-3">
                   Game

@@ -7,7 +7,7 @@ import { FaHome, FaGift, FaCalendarAlt, FaHeart } from "react-icons/fa"
 const NAV_ITEMS = [
   { href: "/", label: "Home", icon: FaHome },
   { href: "/treats", label: "Treats", icon: FaGift },
-  { href: "/timeline", label: "Timeline", icon: FaCalendarAlt },
+  { href: "/timeline", label: "Memories", icon: FaCalendarAlt },
   { href: "/us", label: "Us", icon: FaHeart },
 ] as const
 
@@ -22,7 +22,7 @@ export function Footer() {
 
           return (
             <Link
-              key={href}
+              key={`nav-item-${href}`}
               href={href}
               className={`flex flex-col items-center gap-1 ${isActive ? "text-wb-violet" : "text-gray-400"}`}
             >
