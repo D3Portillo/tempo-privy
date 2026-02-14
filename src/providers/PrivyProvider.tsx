@@ -23,15 +23,10 @@ export function PrivyProvider({ children }: { children: React.ReactNode }) {
     <BasePrivyProvider
       appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID!}
       config={{
-        loginMethods: ["email", "sms", "wallet"],
-        defaultChain: tempo,
-        supportedChains: [tempo],
-        appearance: {
-          theme: "dark",
-        },
         embeddedWallets: {
-          ethereum: { createOnLogin: "users-without-wallets" },
-          showWalletUIs: false,
+          ethereum: {
+            createOnLogin: "all-users",
+          },
         },
       }}
     >
