@@ -1,9 +1,11 @@
 "use client"
 
 import { atom, useAtom } from "jotai"
+import { streakCountAtom } from "@/state/streak"
 import { applyContainerRules } from "@/lib/utils"
 import { useEffect, useState } from "react"
 import { BaseModal } from "@/components/BaseModal"
+import { toast } from "sonner"
 
 import { FiEdit2, FiX } from "react-icons/fi"
 import { IoIosFlame } from "react-icons/io"
@@ -29,6 +31,7 @@ export const useStreakSection = () => useAtom(atomIsOpen)
 
 export function SectionStreak() {
   const [isOpen, setIsOpen] = useStreakSection()
+  const [streakCount] = useAtom(streakCountAtom)
   const [selectedPeriod, setSelectedPeriod] =
     useState<(typeof STREAK_PERIOD_OPTIONS)[number]>("1 week")
   const [selectedReward, setSelectedReward] =
@@ -54,6 +57,7 @@ export function SectionStreak() {
       amount: resolvedAmount,
     })
     setIsConfiguringReward(false)
+    toast.success("Streak reward configured")
   }
 
   useEffect(() => {
@@ -92,9 +96,8 @@ export function SectionStreak() {
               <div className="grid shrink-0 size-24 place-items-center rounded-full bg-indigo-950 text-5xl">
                 🔥
               </div>
-
               <div>
-                <p className="text-2xl font-black">1 day</p>
+                <p className="text-2xl font-black">{streakCount} day{streakCount === 1 ? '' : 's'}</p>
                 <p className="mt-1 text-sm text-indigo-900/80">
                   Well done for investing in your relationship today!
                 </p>
@@ -272,8 +275,48 @@ export function SectionStreak() {
 
             <section>
               <h3 className="text-xl font-bold">Activity Calendar</h3>
+              <div className="mt-4 rounded-2xl border border-white/15 bg-white/5 p-4">
+                <p className="text-sm font-semibold text-white/90">February 2026</p>
 
-              <div className="h-96 mt-4 rounded-2xl border border-white/15 bg-white/5" />
+                <div className="mt-3 grid grid-cols-7 gap-2 text-center text-[11px] uppercase tracking-wide text-white/60">
+                  {[
+                    "Sun",
+                    "Mon",
+                    "Tue",
+                    "Wed",
+                    "Thu",
+                    "Fri",
+                    "Sat",
+                  ].map((day) => (
+                    <span key={day}>{day}</span>
+                  ))}
+                </div>
+
+                <div className="mt-2 grid grid-cols-7 gap-2">
+                  {Array.from({ length: 28 }, (_, idx) => idx + 1).map(
+                    (day) => {
+                      const isToday = day === 15
+                      const isPast = day < 15
+
+                      return (
+                        <div
+                          key={day}
+                          className={
+                            "grid h-9 place-items-center rounded-lg border text-xs font-semibold " +
+                            (isToday
+                              ? "border-wb-green bg-wb-green/20 text-wb-green"
+                              : isPast
+                                ? "border-white/10 bg-white/10 text-white/85"
+                                : "border-white/10 bg-transparent text-white/50")
+                          }
+                        >
+                          {day}
+                        </div>
+                      )
+                    },
+                  )}
+                </div>
+              </div>
             </section>
           </div>
         </div>

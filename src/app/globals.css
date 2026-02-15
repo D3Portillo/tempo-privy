@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+* {
+  outline: none;
+}
+
 body,
 html {
   @apply bg-slate-900;

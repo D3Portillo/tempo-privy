@@ -18,6 +18,7 @@ import { useVaultWallet } from "@/hooks/useVaultWallet"
 import { useBalance } from "@/hooks/useBalance"
 
 import { SectionStreak, useStreakSection } from "./sections/SectionStreak"
+import { useStreakCount } from "@/state/streak"
 import { IconLogo } from "./icons"
 
 import AddressBlock from "./AddressBlock"
@@ -25,6 +26,7 @@ import AddressBlock from "./AddressBlock"
 export function MainLayout({ children }: PropsWithChildren) {
   const [, setIsOpen] = useModalPartnerSync()
   const [, setIsStreakOpen] = useStreakSection()
+  const [streakCount] = useStreakCount()
   const [, setIsVaultOpen] = useModalPartnerVault()
 
   const { isConnected, username, login, logout, evmAddress } = useAuth()
@@ -51,7 +53,7 @@ export function MainLayout({ children }: PropsWithChildren) {
               className="flex h-8 items-center gap-px rounded-full bg-wb-red/80 px-3 text-white"
             >
               <IoIosFlame className="text-xl text-white" />
-              <span className="text-lg scale-95 font-black">3</span>
+              <span className="text-lg scale-95 font-black">{streakCount}</span>
             </button>
 
             <div className="h-8 w-px bg-white/10" />
