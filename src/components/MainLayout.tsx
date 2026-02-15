@@ -9,16 +9,27 @@ import { Footer } from "@/components/Footer"
 import { IoIosFlame } from "react-icons/io"
 import { FiLogOut } from "react-icons/fi"
 import { BsFillArrowThroughHeartFill } from "react-icons/bs"
+import { PiVaultFill } from "react-icons/pi"
 
 import { useModalPartnerSync } from "./ModalPartnerSync"
-import AddressBlock from "./AddressBlock"
+import { ModalPartnerVault, useModalPartnerVault } from "./ModalPartnerVault"
+import { SectionStreak } from "./SectionStreak"
 import { IconLogo } from "./icons"
+
+import { useVaultWallet } from "@/hooks/useVaultWallet"
+import AddressBlock from "./AddressBlock"
 
 export function MainLayout({ children }: PropsWithChildren) {
   const [, setIsOpen] = useModalPartnerSync()
 
-  const { isConnected, username, login, logout } = useAuth()
+  const { isConnected, username, login, logout, evmAddress } = useAuth()
+  const [isStreakOpen, setIsStreakOpen] = useState(false)
+  const [isVaultOpen, setIsVaultOpen] = useModalPartnerVault()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+
+  const { vaultWallet } = useVaultWallet()
+
+  const hasVault = Boolean(vaultWallet)
 
   return (
     <div className="mx-auto min-h-screen max-w-2xl pb-24">
@@ -33,10 +44,13 @@ export function MainLayout({ children }: PropsWithChildren) {
             id="auth-dropdown"
             className="relative flex items-center gap-3"
           >
-            <div className="flex items-center gap-px rounded-full bg-wb-red/80 px-3 h-8 text-white">
+            <button
+              onClick={() => setIsStreakOpen(true)}
+              className="flex h-8 items-center gap-px rounded-full bg-wb-red/80 px-3 text-white"
+            >
               <IoIosFlame className="text-xl text-white" />
               <span className="text-lg scale-95 font-black">7</span>
-            </div>
+            </button>
 
             <button
               onClick={() => setIsDropdownOpen((prev) => !prev)}
@@ -69,6 +83,19 @@ export function MainLayout({ children }: PropsWithChildren) {
                     <span>Invite Partner</span>
                   </button>
 
+                  {hasVault ? (
+                    <button
+                      onClick={() => {
+                        setIsDropdownOpen(false)
+                        setIsVaultOpen(true)
+                      }}
+                      className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-white transition hover:bg-white/10"
+                    >
+                      <PiVaultFill className="text-wb-green text-base" />
+                      <span>Partner Vault</span>
+                    </button>
+                  ) : null}
+
                   <button
                     onClick={() => {
                       setIsDropdownOpen(false)
@@ -97,6 +124,10 @@ export function MainLayout({ children }: PropsWithChildren) {
       <main className="px-6 pb-12">{children}</main>
 
       <Footer />
+      <SectionStreak
+        isOpen={isStreakOpen}
+        onClose={() => setIsStreakOpen(false)}
+      />
     </div>
   )
 }

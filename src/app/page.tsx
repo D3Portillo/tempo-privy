@@ -1,13 +1,11 @@
 import { FaCheckCircle } from "react-icons/fa"
 import { MainLayout } from "@/components/MainLayout"
-import { InvitePartner } from "@/components/InvitePartner"
+import MainActions from "@/components/MainActions"
 
 export default function Home() {
   return (
     <MainLayout>
-      <nav className="mb-6">
-        <InvitePartner />
-      </nav>
+      <MainActions />
 
       <h2 className="text-2xl font-semibold text-white mb-6">
         Daily Activities
@@ -15,7 +13,7 @@ export default function Home() {
 
       <div className="relative">
         {/* Timeline line */}
-        <div className="absolute left-3 rounded-full top-4 bottom-8 w-0.5 bg-wb-green/30" />
+        <div className="absolute left-3 rounded-full top-4 bottom-8 w-0.5 bg-orange-200/20" />
 
         {/* Activity Cards */}
         <div className="space-y-4">
@@ -23,7 +21,7 @@ export default function Home() {
           <div className="relative flex gap-4">
             <div className="relative z-10 shrink-0">
               <figure className="grid -mt-2 place-items-center p-1 bg-slate-900 w-7 h-10 rounded-full">
-                <FaCheckCircle className="text-xl text-wb-green" />
+                <FaCheckCircle className="text-xl text-orange-200" />
               </figure>
             </div>
             <div className="flex-1 bg-purple-200 rounded-3xl p-5 relative overflow-hidden">
@@ -43,7 +41,7 @@ export default function Home() {
           <div className="relative flex gap-4">
             <div className="relative z-10 shrink-0">
               <figure className="grid -mt-2 place-items-center p-1 bg-slate-900 w-7 h-10 rounded-full">
-                <FaCheckCircle className="text-xl text-wb-green" />
+                <FaCheckCircle className="text-xl text-orange-200" />
               </figure>
             </div>
 

@@ -1,7 +1,9 @@
 "use client"
 
 import { Fragment, useEffect, useRef, useState } from "react"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { FiCopy } from "react-icons/fi"
+import { toast } from "sonner"
 import useSWR from "swr"
 
 import { createInviteAction, redeemInviteAction } from "@/app/actions/partner"
@@ -11,12 +13,17 @@ import { atom, useAtom } from "jotai"
 
 import { BaseModal } from "./BaseModal"
 import Spinner from "./Spinner"
+import { BsBalloonHeartFill } from "react-icons/bs"
 
 const atomModalPartnerSync = atom(false)
 export const useModalPartnerSync = () => useAtom(atomModalPartnerSync)
 
 const DEFAULT_INVITE_CODE = "WB-AB000000"
 export function ModalPartnerSync() {
+  const pathname = usePathname()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
   const { evmAddress, isConnected } = useAuth()
   const [isOpen, setIsOpen] = useModalPartnerSync()
   const [isSynced, setIsSynced] = useState(false)
@@ -25,6 +32,8 @@ export function ModalPartnerSync() {
     "share-code",
   )
   const [partnerCode, setPartnerCode] = useState("")
+
+  const inviteCodeFromQuery = searchParams.get("invite-code")
 
   const { data: inviteData } = useSWR(
     isOpen && isConnected && evmAddress
@@ -65,7 +74,7 @@ export function ModalPartnerSync() {
 
   const handleCopyLink = async () => {
     if (!inviteCode) return
-    const inviteLink = `${window.location.origin}/invite?code=${inviteCode}`
+    const inviteLink = `${window.location.origin}/?invite-code=${inviteCode}`
 
     await navigator.clipboard.writeText(inviteLink)
     setCopiedType("link")
@@ -79,15 +88,47 @@ export function ModalPartnerSync() {
     }, 300)
   }
 
+  const handleCloseModal = () => {
+    setIsOpen(false)
+
+    if (!inviteCodeFromQuery) {
+      return
+    }
+
+    const nextParams = new URLSearchParams(searchParams.toString())
+    nextParams.delete("invite-code")
+
+    const nextUrl = nextParams.size
+      ? `${pathname}?${nextParams.toString()}`
+      : pathname
+
+    router.replace(nextUrl, { scroll: false })
+  }
+
   useEffect(() => {
     if (isOpen) {
-      // Reset to default state when modal opens
       setIsSynced(false)
       setCopiedType(null)
-      setActiveTab("share-code")
-      setPartnerCode("")
+
+      if (inviteCodeFromQuery) {
+        setActiveTab("have-code")
+        setPartnerCode(inviteCodeFromQuery)
+      } else {
+        setActiveTab("share-code")
+        setPartnerCode("")
+      }
     }
-  }, [isOpen])
+  }, [isOpen, inviteCodeFromQuery])
+
+  useEffect(() => {
+    if (!inviteCodeFromQuery) return
+
+    setIsOpen(true)
+    setIsSynced(false)
+    setCopiedType(null)
+    setActiveTab("have-code")
+    setPartnerCode(inviteCodeFromQuery)
+  }, [inviteCodeFromQuery, setIsOpen])
 
   const handleSyncNow = async () => {
     if (!isConnected || !evmAddress || !partnerCode.trim()) return
@@ -97,6 +138,8 @@ export function ModalPartnerSync() {
         setIsSynced(true)
       })
       .catch((error) => {
+        toast.error("Invalid Code")
+
         console.error(error)
       })
   }
@@ -106,18 +149,20 @@ export function ModalPartnerSync() {
       return (
         <BaseModal
           ariaLabel="Partner connected"
-          title="❤️ You're now connected"
+          title="❤️ You're connected"
           isOpen={isOpen}
-          onClose={() => setIsOpen(false)}
+          onClose={handleCloseModal}
         >
-          <p className="mt-5 text-center text-sm text-white/80">
+          <p className="mt-5 border-t border-white/10 pt-5 text-center text-sm text-white/80">
             Let's keep the love firing up, set up a personal streak and a reward
             for both to enjoy.
           </p>
 
+          <BsBalloonHeartFill className="mx-auto mt-6 text-6xl text-white" />
+
           <button
-            onClick={() => setIsOpen(false)}
-            className="mt-4 w-full rounded-xl bg-wb-violet p-3 text-sm font-semibold text-white"
+            onClick={handleCloseModal}
+            className="mt-8 w-full rounded-xl bg-wb-violet p-3 text-sm font-semibold text-white"
           >
             Setup Streak
           </button>
@@ -130,7 +175,7 @@ export function ModalPartnerSync() {
         ariaLabel="Invite partner"
         title="Invite partner"
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={handleCloseModal}
       >
         <Fragment>
           <div className="mt-4 grid grid-cols-2 rounded-xl border border-white/10 bg-slate-900/40 p-1">

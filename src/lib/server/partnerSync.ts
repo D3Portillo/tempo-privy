@@ -1,5 +1,10 @@
 import { Redis } from "@upstash/redis"
-import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from "node:crypto"
+import {
+  createCipheriv,
+  createDecipheriv,
+  randomBytes,
+  scryptSync,
+} from "crypto"
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
 
 const redis = Redis.fromEnv()
@@ -20,12 +25,73 @@ type Vault = {
   createdAt: number
 }
 
+const KEY_SCOPE = "wb-app"
+const KEYS_PARTNERS = {
+  getPartnerInviteCode: (code: string) => `${KEY_SCOPE}:invite:${code}`,
+  getCodeByUser: (address: string) => `${KEY_SCOPE}:code-by-user:${address}`,
+  getGroupById: (groupId: string) => `${KEY_SCOPE}:group:${groupId}`,
+  getGroupByMembers: (addressA: string, addressB: string) =>
+    `${KEY_SCOPE}:group-members:${addressA}:${addressB}`,
+  getVaultByGroupId: (groupId: string) => `${KEY_SCOPE}:vault:${groupId}`,
+}
+
+const MAIN_WALLET_PASS_KEY = process.env.MAIN_WALLET_PASS_KEY
+
 const normalizeAddress = (value: string) => value.trim().toLowerCase()
 
 const createCode = () =>
   `WB-${crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase()}`
 
-const MAIN_WALLET_PASS_KEY = process.env.MAIN_WALLET_PASS_KEY
+const getGroupById = (groupId: string) =>
+  redis.get<Group>(KEYS_PARTNERS.getGroupById(groupId))
+
+const getGroupIdByMembers = async (addressA: string, addressB: string) => {
+  return (
+    (await redis.get<string>(
+      KEYS_PARTNERS.getGroupByMembers(addressA, addressB),
+    )) ||
+    (await redis.get<string>(
+      KEYS_PARTNERS.getGroupByMembers(addressB, addressA),
+    ))
+  )
+}
+
+const getVaultByGroupId = (groupId: string) =>
+  redis.get<Vault>(KEYS_PARTNERS.getVaultByGroupId(groupId))
+
+const getAnyGroupIdByAddress = async (address: string) => {
+  const normalized = normalizeAddress(address)
+
+  const [forwardKeys, reverseKeys] = await Promise.all([
+    redis.keys(KEYS_PARTNERS.getGroupByMembers(normalized, "*")),
+    redis.keys(KEYS_PARTNERS.getGroupByMembers("*", normalized)),
+  ])
+
+  const anyPairKey = forwardKeys[0] || reverseKeys[0]
+  if (!anyPairKey) return null
+
+  const groupId = await redis.get<string>(anyPairKey)
+  return groupId || null
+}
+
+const getGroupAndVaultByMembers = async (
+  addressA: string,
+  addressB: string,
+) => {
+  const normalizedA = normalizeAddress(addressA)
+  const normalizedB = normalizeAddress(addressB)
+
+  const groupId = await getGroupIdByMembers(normalizedA, normalizedB)
+  if (!groupId) return null
+
+  const group = await getGroupById(groupId)
+  if (!group) return null
+
+  const vault = await getVaultByGroupId(group.id)
+  if (!vault) return null
+
+  return { group, vault }
+}
 
 const encrypt = (value: string) => {
   if (!MAIN_WALLET_PASS_KEY) {
@@ -37,7 +103,10 @@ const encrypt = (value: string) => {
   const key = scryptSync(MAIN_WALLET_PASS_KEY, salt, 32)
   const cipher = createCipheriv("aes-256-gcm", key, iv)
 
-  const encrypted = Buffer.concat([cipher.update(value, "utf8"), cipher.final()])
+  const encrypted = Buffer.concat([
+    cipher.update(value, "utf8"),
+    cipher.final(),
+  ])
   const authTag = cipher.getAuthTag()
 
   return {
@@ -79,26 +148,10 @@ const decrypt = ({
   return decrypted.toString("utf8")
 }
 
-export const getGroupByAddress = async (address: string) => {
-  const normalized = normalizeAddress(address)
-  const groupId = await redis.get<string>(`partner:user-group:${normalized}`)
-
-  if (!groupId) return null
-
-  const group = await redis.get<Group>(`partner:group:${groupId}`)
-  return group
-}
-
 export const createInviteForAddress = async (address: string) => {
   const normalized = normalizeAddress(address)
-  const currentGroup = await getGroupByAddress(normalized)
-
-  if (currentGroup) {
-    throw new Error("User already has a partner group")
-  }
-
   const previousCode = await redis.get<string>(
-    `partner:code-by-user:${normalized}`,
+    KEYS_PARTNERS.getCodeByUser(normalized),
   )
 
   if (previousCode) {
@@ -106,8 +159,8 @@ export const createInviteForAddress = async (address: string) => {
   }
 
   const code = createCode()
-  await redis.set(`partner:invite:${code}`, normalized)
-  await redis.set(`partner:code-by-user:${normalized}`, code)
+  await redis.set(KEYS_PARTNERS.getPartnerInviteCode(code), normalized)
+  await redis.set(KEYS_PARTNERS.getCodeByUser(normalized), code)
 
   return code
 }
@@ -120,12 +173,9 @@ export const redeemInviteForAddress = async (address: string, code: string) => {
     throw new Error("Invite code is required")
   }
 
-  const inviteeGroup = await getGroupByAddress(invitee)
-  if (inviteeGroup) {
-    throw new Error("User already has a partner group")
-  }
-
-  const inviter = await redis.get<string>(`partner:invite:${safeCode}`)
+  const inviter = await redis.get<string>(
+    KEYS_PARTNERS.getPartnerInviteCode(safeCode),
+  )
   if (!inviter) {
     throw new Error("Invite code not found")
   }
@@ -134,9 +184,14 @@ export const redeemInviteForAddress = async (address: string, code: string) => {
     throw new Error("Cannot use your own invite code")
   }
 
-  const inviterGroup = await getGroupByAddress(inviter)
-  if (inviterGroup) {
-    throw new Error("Inviter already has a partner group")
+  const existingGroupId = await getGroupIdByMembers(inviter, invitee)
+
+  if (existingGroupId) {
+    const existingGroup = await getGroupById(existingGroupId)
+
+    if (existingGroup) {
+      return existingGroup
+    }
   }
 
   const groupId = crypto.randomUUID()
@@ -145,10 +200,6 @@ export const redeemInviteForAddress = async (address: string, code: string) => {
     members: [inviter, invitee],
     createdAt: Date.now(),
   }
-
-  await redis.set(`partner:group:${groupId}`, group)
-  await redis.set(`partner:user-group:${inviter}`, groupId)
-  await redis.set(`partner:user-group:${invitee}`, groupId)
 
   const privateKey = generatePrivateKey()
   const account = privateKeyToAccount(privateKey)
@@ -164,19 +215,31 @@ export const redeemInviteForAddress = async (address: string, code: string) => {
     createdAt: Date.now(),
   }
 
-  await redis.set(`partner:vault:${groupId}`, vault)
-
-  await redis.del(`partner:invite:${safeCode}`)
-  await redis.del(`partner:code-by-user:${inviter}`)
+  await redis.set(KEYS_PARTNERS.getGroupById(groupId), group)
+  await redis.set(KEYS_PARTNERS.getGroupByMembers(inviter, invitee), groupId)
+  await redis.set(KEYS_PARTNERS.getVaultByGroupId(groupId), vault)
 
   return group
 }
 
-export const getVaultByAddress = async (address: string) => {
-  const group = await getGroupByAddress(address)
-  if (!group) return null
+export const getVaultByMembers = async (addressA: string, addressB: string) => {
+  const context = await getGroupAndVaultByMembers(addressA, addressB)
+  if (!context) return null
 
-  const vault = await redis.get<Vault>(`partner:vault:${group.id}`)
+  const { vault } = context
+
+  return {
+    groupId: vault.groupId,
+    address: vault.address,
+    createdAt: vault.createdAt,
+  }
+}
+
+export const getAnyVaultByAddress = async (address: string) => {
+  const groupId = await getAnyGroupIdByAddress(address)
+  if (!groupId) return null
+
+  const vault = await getVaultByGroupId(groupId)
   if (!vault) return null
 
   return {
@@ -186,12 +249,14 @@ export const getVaultByAddress = async (address: string) => {
   }
 }
 
-export const getDecryptedVaultPrivateKeyByAddress = async (address: string) => {
-  const group = await getGroupByAddress(address)
-  if (!group) return null
+export const getDecryptedVaultPrivateKeyByMembers = async (
+  addressA: string,
+  addressB: string,
+) => {
+  const context = await getGroupAndVaultByMembers(addressA, addressB)
+  if (!context) return null
 
-  const vault = await redis.get<Vault>(`partner:vault:${group.id}`)
-  if (!vault) return null
+  const { vault } = context
 
   const privateKey = decrypt({
     encryptedValue: vault.encryptedPrivateKey,

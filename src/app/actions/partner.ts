@@ -8,8 +8,9 @@ import { clientTempo, tempo } from "@/lib/chain"
 import { alphaUsd } from "@/constants"
 import {
   createInviteForAddress,
-  getDecryptedVaultPrivateKeyByAddress,
-  getVaultByAddress,
+  getAnyVaultByAddress,
+  getDecryptedVaultPrivateKeyByMembers,
+  getVaultByMembers,
   redeemInviteForAddress,
 } from "@/lib/server/partnerSync"
 
@@ -29,8 +30,19 @@ export const redeemInviteAction = async (evmAddress: string, code: string) => {
   }
 }
 
-export const getVaultWalletAction = async (evmAddress: string) => {
-  const vault = await getVaultByAddress(evmAddress)
+export const getVaultWalletAction = async (
+  evmAddress: string,
+  partnerEvmAddress: string,
+) => {
+  const vault = await getVaultByMembers(evmAddress, partnerEvmAddress)
+  return {
+    vaultWallet: vault?.address || null,
+  }
+}
+
+export const getAnyVaultWalletAction = async (evmAddress: string) => {
+  const vault = await getAnyVaultByAddress(evmAddress)
+
   return {
     vaultWallet: vault?.address || null,
   }
@@ -38,9 +50,13 @@ export const getVaultWalletAction = async (evmAddress: string) => {
 
 export const redeemVaultBalanceAction = async (
   evmAddress: string,
+  partnerEvmAddress: string,
   amount: string,
 ) => {
-  const vault = await getDecryptedVaultPrivateKeyByAddress(evmAddress)
+  const vault = await getDecryptedVaultPrivateKeyByMembers(
+    evmAddress,
+    partnerEvmAddress,
+  )
   if (!vault) {
     throw new Error("Vault wallet not found")
   }

@@ -17,7 +17,7 @@ export function InvitePartner() {
         // Show wallet flow when not connected
         login()
       }}
-      className="flex w-full items-center justify-between rounded-2xl bg-linear-to-br from-pink-300/50 border border-white/10 to-wb-violet/50 px-4 py-3 text-white"
+      className="flex w-full items-center justify-between rounded-2xl bg-linear-to-br from-pink-300/50 border border-white/10 to-wb-violet/50 px-4 h-12 text-white"
     >
       <BsEnvelopeOpenHeartFill className="text-2xl" />
       <h2>Let's invite your partner</h2>
