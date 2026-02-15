@@ -37,7 +37,7 @@ export function MainLayout({ children }: PropsWithChildren) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   const { isWalletReady } = useVaultWallet()
-  const { balance } = useBalance(evmAddress)
+  const { formattedBalance } = useBalance(evmAddress)
 
   return (
     <div className={applyContainerRules("min-h-screen pb-24")}>
@@ -64,7 +64,7 @@ export function MainLayout({ children }: PropsWithChildren) {
 
             <Link href="/wallet" className="flex h-8 items-center text-white">
               <span className="text-sm tabular-nums font-black">
-                ${balance}
+                ${formattedBalance}
               </span>
             </Link>
 

@@ -9,7 +9,7 @@ import { localizeNumber } from "@/lib/number"
 import { alphaUsd } from "@/constants"
 
 export function useBalance(address?: string | null) {
-  const { data: balance = "0", ...query } = useSWR(
+  const { data: result = null, ...query } = useSWR(
     address ? ["alpha-usd-balance", address] : null,
     async ([, walletAddress]) => {
       const [rawBalance, decimals] = await Promise.all([
@@ -26,7 +26,10 @@ export function useBalance(address?: string | null) {
         }) as Promise<number>,
       ])
 
-      return localizeNumber(formatUnits(rawBalance, decimals))
+      return {
+        balance: formatUnits(rawBalance, decimals),
+        decimals,
+      }
     },
     {
       refreshInterval: 10000,
@@ -35,8 +38,11 @@ export function useBalance(address?: string | null) {
     },
   )
 
+  const BALANCE = result?.balance || "0"
   return {
     ...query,
-    balance: balance == "0" ? "0.00" : balance,
+    formattedBalance: BALANCE == "0" ? "0.00" : localizeNumber(BALANCE),
+    formattedDecimals: result?.decimals || 18,
+    balance: Number(BALANCE),
   }
 }

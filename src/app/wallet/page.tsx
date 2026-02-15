@@ -1,7 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { toast } from "sonner"
+import { createWalletClient, custom, parseUnits, walletActions } from "viem"
+import { tempoActions } from "tempo.ts/viem"
 
 import { MainLayout } from "@/components/MainLayout"
 import { BaseModal } from "@/components/BaseModal"
@@ -10,16 +12,22 @@ import { TopUpModal } from "@/components/TopUpModal"
 import { useBalance } from "@/hooks/useBalance"
 import { useVaultWallet } from "@/hooks/useVaultWallet"
 import { useAuth } from "@/lib/wallet"
+import { alphaUsd } from "@/constants"
+import { tempo } from "@/lib/chain"
+import { useWallets } from "@privy-io/react-auth"
 
 export default function WalletPage() {
   const { evmAddress } = useAuth()
+  const { wallets } = useWallets()
   const { vaultWallet, isWalletReady } = useVaultWallet()
 
-  const { balance: walletBalance } = useBalance(evmAddress)
-  const { balance: vaultBalance } = useBalance(vaultWallet)
+  const {
+    formattedBalance: walletBalance,
+    balance: rawWalletBalance,
+    formattedDecimals,
+  } = useBalance(evmAddress)
 
-  const [vaultBalanceDemo, setVaultBalanceDemo] = useState(0)
-  const [isVaultBalanceDemoReady, setIsVaultBalanceDemoReady] = useState(false)
+  const { formattedBalance: vaultBalance } = useBalance(vaultWallet)
 
   const [sendEmail, setSendEmail] = useState("")
   const [sendAmount, setSendAmount] = useState("")
@@ -31,16 +39,6 @@ export default function WalletPage() {
   const [isVaultTipModalOpen, setIsVaultTipModalOpen] = useState(false)
   const [isVaultWithdrawModalOpen, setIsVaultWithdrawModalOpen] =
     useState(false)
-
-  useEffect(() => {
-    if (isVaultBalanceDemoReady) return
-
-    const parsedVaultBalance = Number(vaultBalance.replaceAll(",", ""))
-    if (!Number.isNaN(parsedVaultBalance)) {
-      setVaultBalanceDemo(parsedVaultBalance)
-      setIsVaultBalanceDemoReady(true)
-    }
-  }, [vaultBalance, isVaultBalanceDemoReady])
 
   const handleSend = () => {
     if (!sendEmail.trim()) {
@@ -59,30 +57,58 @@ export default function WalletPage() {
     setIsSendModalOpen(false)
   }
 
-  const handleVaultTip = () => {
-    const amount = Number(vaultTipAmount)
-
-    if (!vaultTipAmount.trim() || Number.isNaN(amount) || amount <= 0) {
-      toast.error("Add a valid amount")
+  const handleVaultTip = async () => {
+    if (!vaultWallet) {
+      toast.error("Sync with partner to enable withdrawals")
       return
     }
 
-    setVaultBalanceDemo((prev) => prev + amount)
+    const amount = Number(vaultTipAmount)
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      toast.error("Invalid amount")
+      return
+    }
+
+    if (rawWalletBalance < amount) {
+      toast.error("Insufficient wallet balance")
+      return
+    }
+
+    console.debug({ wallets })
+    const wallet = wallets.find((w) => w.connectorType === "embedded") || null
+
+    if (!wallet) {
+      toast.error("Wallet not found")
+      return
+    }
+
+    const provider = await wallet.getEthereumProvider()
+    const walletClient = createWalletClient({
+      account: evmAddress!,
+      chain: tempo,
+      transport: custom(provider),
+    })
+      .extend(walletActions)
+      .extend(tempoActions())
+
+    const { receipt } = await walletClient.token.transferSync({
+      to: vaultWallet,
+      amount: parseUnits(amount.toString(), formattedDecimals),
+      token: alphaUsd,
+    })
+
+    console.debug({ receipt })
     toast.success(`Added $${amount.toFixed(2)} to Partner Vault`)
     setVaultTipAmount("")
     setIsVaultTipModalOpen(false)
   }
 
-  const handleVaultWithdraw = () => {
+  const handleVaultWithdraw = async () => {
     const amount = Number(vaultWithdrawAmount)
 
-    if (!vaultWithdrawAmount.trim() || Number.isNaN(amount) || amount <= 0) {
+    if (!Number.isFinite(amount) || amount <= 0) {
       toast.error("Add a valid amount")
-      return
-    }
-
-    if (amount > vaultBalanceDemo) {
-      toast.error("Insufficient Partner Vault balance")
       return
     }
 
@@ -91,7 +117,6 @@ export default function WalletPage() {
       return
     }
 
-    setVaultBalanceDemo((prev) => prev - amount)
     toast.success("Withdraw request sent")
     setVaultWithdrawAmount("")
     setVaultWithdrawReason("")
@@ -147,7 +172,7 @@ export default function WalletPage() {
                 PARTNER VAULT
               </p>
               <p className="mt-2 text-4xl font-black text-white">
-                ${vaultBalanceDemo.toFixed(2)}
+                ${vaultBalance}
               </p>
             </div>
             <div className="grid size-12 place-items-center rounded-2xl bg-white/10 text-2xl">
@@ -230,8 +255,8 @@ export default function WalletPage() {
       </BaseModal>
 
       <BaseModal
-        ariaLabel="Tip / Add money"
-        title="Tip / Add money"
+        ariaLabel="Vault Top-up"
+        title="Vault Top-up"
         isOpen={isVaultTipModalOpen}
         onClose={() => setIsVaultTipModalOpen(false)}
       >
