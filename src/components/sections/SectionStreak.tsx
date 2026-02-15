@@ -3,7 +3,7 @@
 import { atom, useAtom } from "jotai"
 import { streakCountAtom } from "@/state/streak"
 import { applyContainerRules } from "@/lib/utils"
-import { useEffect, useState } from "react"
+import { Fragment, useEffect, useState } from "react"
 import { BaseModal } from "@/components/BaseModal"
 import { toast } from "sonner"
 
@@ -72,21 +72,29 @@ export function SectionStreak() {
   if (!isOpen) return null
 
   return (
-    <>
+    <Fragment>
+      <style global>
+        {`
+          html,
+          body {
+            overflow: hidden;
+          }
+        `}
+      </style>
       <section className="fixed bg-indigo-950 inset-0 z-20">
         <div
           className={applyContainerRules(
             "absolute inset-x-0 bottom-0 h-dvh overflow-y-auto text-white",
           )}
         >
-          <div className="bg-purple-200 sm:rounded-b-3xl px-6 py-6 text-indigo-950">
+          <div className="bg-purple-200 border-b border-slate-900 sticky top-0 z-1 sm:rounded-b-3xl px-6 py-6 text-indigo-950">
             <div className="flex items-start justify-between">
               <h2 className="text-2xl font-bold">Streak</h2>
 
               <button
                 onClick={() => setIsOpen(false)}
                 aria-label="Close streak"
-                className="rounded-full bg-indigo-900/80 p-2 text-white"
+                className="rounded-full bg-black/10 border border-black/7 p-2 text-black"
               >
                 <FiX className="text-xl" />
               </button>
@@ -107,7 +115,7 @@ export function SectionStreak() {
             </div>
           </div>
 
-          <div className="px-6 space-y-7 py-6">
+          <div className="px-6 space-y-9 pt-12 pb-24">
             <section>
               <h3 className="text-xl font-bold">Streak Reward</h3>
               <p className="mt-2 text-sm opacity-70">
@@ -324,7 +332,7 @@ export function SectionStreak() {
         isOpen={isFreezeSetupOpen}
         onClose={() => setIsFreezeSetupOpen(false)}
       />
-    </>
+    </Fragment>
   )
 }
 
