@@ -94,18 +94,18 @@ export function SectionStreak() {
               <button
                 onClick={() => setIsOpen(false)}
                 aria-label="Close streak"
-                className="rounded-full bg-black/10 border border-black/7 p-2 text-black"
+                className="rounded-full bg-white/20 p-2 text-black"
               >
                 <FiX className="text-xl" />
               </button>
             </div>
 
             <div className="mt-5 flex items-center gap-4">
-              <div className="grid shrink-0 size-24 place-items-center rounded-full bg-indigo-950 text-5xl">
+              <div className="grid shrink-0 size-22 place-items-center rounded-full bg-linear-to-tr from-yellow-100 to-white border-2 border-black text-5xl">
                 🔥
               </div>
               <div>
-                <p className="text-2xl font-black">
+                <p className="text-xl font-black">
                   {streakCount} day{streakCount === 1 ? "" : "s"}
                 </p>
                 <p className="mt-1 text-sm text-indigo-900/80">

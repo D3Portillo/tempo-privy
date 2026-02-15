@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { Fragment, useState, type PropsWithChildren } from "react"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 import { useAuth } from "@/lib/wallet"
 import { Footer } from "@/components/Footer"
@@ -27,6 +27,9 @@ import AddressBlock from "./AddressBlock"
 
 export function MainLayout({ children }: PropsWithChildren) {
   const router = useRouter()
+  const pathname = usePathname()
+
+  const isWalletView = pathname.includes("/wallet")
 
   const [, setIsOpen] = useModalPartnerSync()
   const [, setIsStreakOpen] = useStreakSection()
@@ -98,30 +101,33 @@ export function MainLayout({ children }: PropsWithChildren) {
                     <BsFillArrowThroughHeartFill className="text-base text-pink-300" />
                     <span>Invite Partner</span>
                   </button>
+                  {isWalletView ? null : (
+                    <Fragment>
+                      {isWalletReady ? (
+                        <button
+                          onClick={() => {
+                            setIsDropdownOpen(false)
+                            setIsVaultOpen(true)
+                          }}
+                          className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-white transition hover:bg-white/10"
+                        >
+                          <PiVaultFill className="text-wb-green text-base" />
+                          <span>Partner Vault</span>
+                        </button>
+                      ) : null}
 
-                  {isWalletReady ? (
-                    <button
-                      onClick={() => {
-                        setIsDropdownOpen(false)
-                        setIsVaultOpen(true)
-                      }}
-                      className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-white transition hover:bg-white/10"
-                    >
-                      <PiVaultFill className="text-wb-green text-base" />
-                      <span>Partner Vault</span>
-                    </button>
-                  ) : null}
-
-                  <button
-                    onClick={() => {
-                      setIsDropdownOpen(false)
-                      router.push("/wallet")
-                    }}
-                    className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-white transition hover:bg-white/10"
-                  >
-                    <RiMoneyDollarBoxFill className="text-amber-300 text-base" />
-                    <span>My Wallet</span>
-                  </button>
+                      <button
+                        onClick={() => {
+                          setIsDropdownOpen(false)
+                          router.push("/wallet")
+                        }}
+                        className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-white transition hover:bg-white/10"
+                      >
+                        <RiMoneyDollarBoxFill className="text-amber-300 text-base" />
+                        <span>My Wallet</span>
+                      </button>
+                    </Fragment>
+                  )}
 
                   <button
                     onClick={() => {
