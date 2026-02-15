@@ -3,7 +3,14 @@
 import { useState } from "react"
 import { toast } from "sonner"
 import { formatDistanceToNow } from "date-fns"
-import { createWalletClient, custom, parseUnits, walletActions } from "viem"
+import {
+  type Address,
+  createWalletClient,
+  custom,
+  isAddress,
+  parseUnits,
+  walletActions,
+} from "viem"
 import { tempoActions } from "tempo.ts/viem"
 
 import { useWallets } from "@privy-io/react-auth"
@@ -16,11 +23,13 @@ import { TopUpModal } from "@/components/TopUpModal"
 import { FiExternalLink } from "react-icons/fi"
 
 import { localizeNumber } from "@/lib/number"
+import { beautifyAddress } from "@/lib/utils"
+import { alphaUsd } from "@/constants"
+import { tempo } from "@/lib/chain"
+
 import { useBalance } from "@/hooks/useBalance"
 import { useVaultWallet } from "@/hooks/useVaultWallet"
 import { useAuth } from "@/lib/wallet"
-import { alphaUsd } from "@/constants"
-import { tempo } from "@/lib/chain"
 
 const atomHistory = atomWithStorage(
   "wb.history",
@@ -28,6 +37,7 @@ const atomHistory = atomWithStorage(
     id: string
     timestamp: number
     amount: number
+    label: string
     transactionHash: string
   }>,
 )
@@ -45,11 +55,13 @@ export default function WalletPage() {
 
   const { formattedBalance: vaultBalance } = useBalance(vaultWallet)
 
-  const [sendEmail, setSendEmail] = useState("")
+  const [sendAddress, setSendAddress] = useState("")
   const [sendAmount, setSendAmount] = useState("")
+
   const [vaultTipAmount, setVaultTipAmount] = useState("")
   const [vaultWithdrawAmount, setVaultWithdrawAmount] = useState("")
   const [vaultWithdrawReason, setVaultWithdrawReason] = useState("")
+
   const [isSendModalOpen, setIsSendModalOpen] = useState(false)
   const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false)
   const [isVaultTipModalOpen, setIsVaultTipModalOpen] = useState(false)
@@ -58,19 +70,63 @@ export default function WalletPage() {
 
   const [txHistory, setTxHistory] = useAtom(atomHistory)
 
-  const handleSend = () => {
-    if (!sendEmail.trim()) {
-      toast.error("Add an email first")
+  const tempoSendUSD = async (to: Address, amount: string | number) => {
+    console.debug({ wallets })
+    const wallet = wallets.find((w) => w.connectorType === "embedded") || null
+    if (!wallet) throw new Error("Embedded wallet not found")
+
+    const provider = await wallet.getEthereumProvider()
+    const walletClient = createWalletClient({
+      account: evmAddress!,
+      chain: tempo,
+      transport: custom(provider),
+    })
+      .extend(walletActions)
+      .extend(tempoActions())
+
+    const transactionHash = await walletClient.token.transfer({
+      amount: parseUnits(`${amount}`, formattedDecimals),
+      token: alphaUsd,
+      to,
+    })
+
+    return { transactionHash }
+  }
+
+  const handleSend = async () => {
+    if (!sendAddress.startsWith("0x") && !isAddress(sendAddress)) {
+      toast.error("Invalid address")
       return
     }
 
-    if (!sendAmount.trim() || Number(sendAmount) <= 0) {
-      toast.error("Add a valid amount")
+    const amount = Number(sendAmount)
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      toast.error("Invalid amount")
       return
     }
 
-    toast.success(`Sent $${sendAmount.trim()} to ${sendEmail.trim()}`)
-    setSendEmail("")
+    if (rawWalletBalance < amount) {
+      toast.error("Insufficient wallet balance")
+      return
+    }
+
+    const { transactionHash } = await tempoSendUSD(sendAddress as any, amount)
+    console.debug({ transactionHash })
+
+    setTxHistory((prev) => [
+      {
+        id: `tx-${Date.now()}`,
+        timestamp: Date.now(),
+        label: `Send ${beautifyAddress(sendAddress)}`,
+        transactionHash,
+        amount,
+      },
+      ...prev,
+    ])
+
+    toast.success(`$${localizeNumber(amount)} sent!`)
+    setSendAddress("")
     setSendAmount("")
     setIsSendModalOpen(false)
   }
@@ -93,42 +149,21 @@ export default function WalletPage() {
       return
     }
 
-    console.debug({ wallets })
-    const wallet = wallets.find((w) => w.connectorType === "embedded") || null
-
-    if (!wallet) {
-      toast.error("Wallet not found")
-      return
-    }
-
-    const provider = await wallet.getEthereumProvider()
-    const walletClient = createWalletClient({
-      account: evmAddress!,
-      chain: tempo,
-      transport: custom(provider),
-    })
-      .extend(walletActions)
-      .extend(tempoActions())
-
-    const transactionHash = await walletClient.token.transfer({
-      to: vaultWallet,
-      amount: parseUnits(amount.toString(), formattedDecimals),
-      token: alphaUsd,
-    })
-
+    const { transactionHash } = await tempoSendUSD(vaultWallet, amount)
     console.debug({ transactionHash })
 
     setTxHistory((prev) => [
       {
         id: `tx-${Date.now()}`,
         timestamp: Date.now(),
+        label: "Vault Transfer",
         transactionHash,
         amount,
       },
       ...prev,
     ])
 
-    toast.success(`Added $${amount.toFixed(2)} to Partner Vault`)
+    toast.success(`Added $${localizeNumber(amount)} to Partner Vault`)
     setVaultTipAmount("")
     setIsVaultTipModalOpen(false)
   }
@@ -249,7 +284,9 @@ export default function WalletPage() {
                 >
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-sm font-semibold">Vault Transfer</p>
+                      <p className="text-sm font-semibold">
+                        {tx.label || "Vault Transfer"}
+                      </p>
 
                       <p className="text-xs first-letter:capitalize text-white/60">
                         {formatDistanceToNow(new Date(tx.timestamp), {
@@ -280,25 +317,25 @@ export default function WalletPage() {
       </div>
 
       <BaseModal
-        ariaLabel="Send to user"
-        title="Send to user"
+        ariaLabel="Send to wallet"
+        title="Send to wallet"
         isOpen={isSendModalOpen}
         onClose={() => setIsSendModalOpen(false)}
       >
         <div className="mt-4">
           <label
-            htmlFor="send-email"
+            htmlFor="send-address"
             className="text-xs uppercase tracking-wide text-white/60"
           >
-            Email
+            Address
           </label>
 
           <input
-            id="send-email"
-            type="email"
-            value={sendEmail}
-            onChange={(event) => setSendEmail(event.target.value)}
-            placeholder="partner@email.com"
+            id="send-address"
+            type="text"
+            value={sendAddress}
+            onChange={(event) => setSendAddress(event.target.value)}
+            placeholder="0x1234... address"
             className="mt-2 w-full rounded-xl border border-white/20 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/40"
           />
 
