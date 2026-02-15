@@ -32,8 +32,11 @@ export function QuizModal({
   }
 
   const handleClaim = () => {
-    setQuizComplete(new Date().toISOString().slice(0, 10))
+    const today = new Date().toISOString().slice(0, 10)
+
+    setQuizComplete(today)
     setStreakCount((count) => count + 1)
+    sessionStorage.setItem("streak-just-completed", today)
     setStep(QUESTIONS.length + 1)
   }
 
@@ -49,8 +52,8 @@ export function QuizModal({
             <div className="flex gap-2 justify-center">
               {[1, 2, 3, 4, 5].map((val) => (
                 <button
-                  key={val}
-                  className="rounded-full w-10 h-10 bg-wb-violet text-white font-bold text-lg active:scale-98 transition-transform"
+                  key={`quiz-answer-${step}-${val}`}
+                  className="rounded-full border border-wb-violet/50 size-10 bg-wb-violet/70 focus:bg-wb-violet text-white font-bold text-lg active:scale-98 transition-transform"
                   onClick={() => handleAnswer(val)}
                 >
                   {val}

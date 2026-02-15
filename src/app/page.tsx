@@ -7,7 +7,7 @@ import MainActions from "@/components/MainActions"
 import { questionCompleteAtom, quizCompleteAtom } from "@/state/streak"
 import { QuestionModal } from "@/components/Question"
 import { QuizModal } from "@/components/Quiz"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import confetti from "canvas-confetti"
 
@@ -20,8 +20,6 @@ export default function Home() {
   const isQuestionCompleteToday = questionComplete === today
   const isQuizCompleteToday = quizComplete === today
   const isGameCompleteToday = isQuestionCompleteToday && isQuizCompleteToday
-  const hasMountedRef = useRef(false)
-  const prevCompletedRef = useRef(isGameCompleteToday)
 
   const fireConfetti = () => {
     const base = {
@@ -38,21 +36,15 @@ export default function Home() {
   }
 
   useEffect(() => {
-    if (!hasMountedRef.current) {
-      hasMountedRef.current = true
-      prevCompletedRef.current = isGameCompleteToday
-      return
-    }
+    if (!isGameCompleteToday) return
 
-    if (isGameCompleteToday && !prevCompletedRef.current) {
-      toast.success("Streak complete")
-      fireConfetti()
-      prevCompletedRef.current = true
-      return
-    }
+    const justCompleted = sessionStorage.getItem("streak-just-completed")
+    if (justCompleted !== today) return
 
-    prevCompletedRef.current = isGameCompleteToday
-  }, [isGameCompleteToday])
+    toast.success("Streak complete")
+    fireConfetti()
+    sessionStorage.removeItem("streak-just-completed")
+  }, [isGameCompleteToday, today])
 
   return (
     <MainLayout>
