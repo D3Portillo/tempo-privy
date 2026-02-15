@@ -5,6 +5,7 @@ import { toast } from "sonner"
 
 import { MainLayout } from "@/components/MainLayout"
 import { BaseModal } from "@/components/BaseModal"
+import { TopUpModal } from "@/components/TopUpModal"
 
 import { useModalPartnerVault } from "@/components/ModalPartnerVault"
 import { useBalance } from "@/hooks/useBalance"
@@ -21,6 +22,7 @@ export default function WalletPage() {
 
   const [sendEmail, setSendEmail] = useState("")
   const [isSendModalOpen, setIsSendModalOpen] = useState(false)
+  const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false)
 
   const handleSend = () => {
     if (!sendEmail.trim()) {
@@ -54,7 +56,7 @@ export default function WalletPage() {
           <div className="mt-5 grid gap-2">
             <button
               type="button"
-              onClick={() => toast.info("Top-up flow coming next")}
+              onClick={() => setIsTopUpModalOpen(true)}
               className="rounded-xl bg-white px-3 py-3 text-sm font-semibold text-slate-900"
             >
               Top-up
@@ -68,6 +70,11 @@ export default function WalletPage() {
               Send
             </button>
           </div>
+          <TopUpModal
+            isOpen={isTopUpModalOpen}
+            onClose={() => setIsTopUpModalOpen(false)}
+            address={evmAddress || ""}
+          />
         </section>
 
         <section className="rounded-3xl border border-white/10 bg-white/5 p-5">
