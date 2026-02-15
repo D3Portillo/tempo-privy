@@ -1,8 +1,9 @@
 "use client"
 
-import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+
+import { applyContainerRules, cn } from "@/lib/utils"
 import { FaHome, FaGift, FaCalendarAlt, FaHeart } from "react-icons/fa"
 
 const NAV_ITEMS = [
@@ -16,7 +17,11 @@ export function Footer() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed sm:rounded-t-4xl bottom-0 left-1/2 w-full max-w-2xl border-t-2 border-white/10 drop-shadow-lg -translate-x-1/2 bg-[#0b1a3d] px-6 pt-5 pb-4">
+    <nav
+      className={applyContainerRules(
+        "fixed sm:rounded-t-4xl bottom-0 left-1/2 border-t-2 border-white/10 drop-shadow-lg -translate-x-1/2 bg-[#0b1a3d] px-6 pt-5 pb-4",
+      )}
+    >
       <div className="flex items-center justify-around">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href

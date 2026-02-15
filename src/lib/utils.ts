@@ -2,6 +2,8 @@ import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs))
+export const applyContainerRules = (className?: ClassValue) =>
+  cn("mx-auto w-full max-w-2xl", className)
 
 export const generateUUID = () => crypto.randomUUID().replace(/-/g, "")
 

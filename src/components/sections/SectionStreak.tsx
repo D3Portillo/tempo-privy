@@ -1,6 +1,8 @@
 "use client"
 
 import { atom, useAtom } from "jotai"
+import { applyContainerRules } from "@/lib/utils"
+
 import { FiX } from "react-icons/fi"
 
 const atomIsOpen = atom(false)
@@ -13,8 +15,12 @@ export function SectionStreak() {
 
   return (
     <section className="fixed bg-indigo-950 inset-0 z-40">
-      <div className="absolute inset-x-0 bottom-0 h-dvh overflow-y-auto text-white">
-        <div className="bg-purple-200 px-6 py-6 text-indigo-950">
+      <div
+        className={applyContainerRules(
+          "absolute inset-x-0 bottom-0 h-dvh overflow-y-auto text-white",
+        )}
+      >
+        <div className="bg-purple-200 sm:rounded-b-3xl px-6 py-6 text-indigo-950">
           <div className="flex items-start justify-between">
             <h2 className="text-2xl font-bold">Streak</h2>
 

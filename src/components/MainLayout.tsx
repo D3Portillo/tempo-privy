@@ -11,6 +11,7 @@ import { FiLogOut } from "react-icons/fi"
 import { BsFillArrowThroughHeartFill } from "react-icons/bs"
 import { PiVaultFill } from "react-icons/pi"
 
+import { applyContainerRules } from "@/lib/utils"
 import { useModalPartnerSync } from "./ModalPartnerSync"
 import { useModalPartnerVault } from "./ModalPartnerVault"
 import { SectionStreak, useStreakSection } from "./sections/SectionStreak"
@@ -32,7 +33,7 @@ export function MainLayout({ children }: PropsWithChildren) {
   const hasVault = Boolean(vaultWallet)
 
   return (
-    <div className="mx-auto min-h-screen max-w-2xl pb-24">
+    <div className={applyContainerRules("min-h-screen pb-24")}>
       {/* Header */}
       <header className="flex border-b border-white/5 mb-5 items-center justify-between p-6">
         <Link className="w-24 text-white" href="/">
