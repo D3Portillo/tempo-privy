@@ -2,6 +2,7 @@
 
 import { ModalPartnerSync } from "@/components/ModalPartnerSync"
 import { ModalPartnerVault } from "@/components/ModalPartnerVault"
+import { SectionStreak } from "@/components/sections/SectionStreak"
 import { Fragment, type PropsWithChildren } from "react"
 import { Toaster } from "sonner"
 
@@ -16,6 +17,7 @@ export default function ModalProviders({ children }: PropsWithChildren) {
       />
       <ModalPartnerSync />
       <ModalPartnerVault />
+      <SectionStreak />
 
       {children}
     </Fragment>

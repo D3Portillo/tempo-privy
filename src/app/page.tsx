@@ -13,7 +13,7 @@ export default function Home() {
 
       <div className="relative">
         {/* Timeline line */}
-        <div className="absolute left-3 rounded-full top-4 bottom-8 w-0.5 bg-orange-200/20" />
+        <div className="absolute left-3 rounded-full top-4 bottom-8 w-0.5 bg-wb-green/25" />
 
         {/* Activity Cards */}
         <div className="space-y-4">
@@ -21,7 +21,7 @@ export default function Home() {
           <div className="relative flex gap-4">
             <div className="relative z-10 shrink-0">
               <figure className="grid -mt-2 place-items-center p-1 bg-slate-900 w-7 h-10 rounded-full">
-                <FaCheckCircle className="text-xl text-orange-200" />
+                <FaCheckCircle className="text-xl text-wb-green" />
               </figure>
             </div>
             <div className="flex-1 bg-purple-200 rounded-3xl p-5 relative overflow-hidden">
@@ -41,7 +41,7 @@ export default function Home() {
           <div className="relative flex gap-4">
             <div className="relative z-10 shrink-0">
               <figure className="grid -mt-2 place-items-center p-1 bg-slate-900 w-7 h-10 rounded-full">
-                <FaCheckCircle className="text-xl text-orange-200" />
+                <FaCheckCircle className="text-xl text-wb-green" />
               </figure>
             </div>
 
@@ -61,9 +61,9 @@ export default function Home() {
           {/* Game Card */}
           <div className="relative flex gap-4">
             <div className="relative z-10 shrink-0">
-              <figure className="grid -mt-2 place-items-center p-1 bg-slate-900 w-7 h-10 rounded-full">
-                <div className="size-5 grid place-items-center border-2 border-wb-violet rounded-full">
-                  <div className="bg-wb-violet size-2 rounded-full" />
+              <figure className="grid text-[#ff7bfd] -mt-2 place-items-center p-1 bg-slate-900 w-7 h-10 rounded-full">
+                <div className="size-5 grid place-items-center border-2 border-current rounded-full">
+                  <div className="bg-current size-2 rounded-full" />
                 </div>
               </figure>
             </div>

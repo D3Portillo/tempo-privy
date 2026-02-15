@@ -12,8 +12,8 @@ import { BsFillArrowThroughHeartFill } from "react-icons/bs"
 import { PiVaultFill } from "react-icons/pi"
 
 import { useModalPartnerSync } from "./ModalPartnerSync"
-import { ModalPartnerVault, useModalPartnerVault } from "./ModalPartnerVault"
-import { SectionStreak } from "./SectionStreak"
+import { useModalPartnerVault } from "./ModalPartnerVault"
+import { SectionStreak, useStreakSection } from "./sections/SectionStreak"
 import { IconLogo } from "./icons"
 
 import { useVaultWallet } from "@/hooks/useVaultWallet"
@@ -22,9 +22,9 @@ import AddressBlock from "./AddressBlock"
 export function MainLayout({ children }: PropsWithChildren) {
   const [, setIsOpen] = useModalPartnerSync()
 
-  const { isConnected, username, login, logout, evmAddress } = useAuth()
-  const [isStreakOpen, setIsStreakOpen] = useState(false)
-  const [isVaultOpen, setIsVaultOpen] = useModalPartnerVault()
+  const { isConnected, username, login, logout } = useAuth()
+  const [, setIsStreakOpen] = useStreakSection()
+  const [, setIsVaultOpen] = useModalPartnerVault()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   const { vaultWallet } = useVaultWallet()
@@ -124,10 +124,7 @@ export function MainLayout({ children }: PropsWithChildren) {
       <main className="px-6 pb-12">{children}</main>
 
       <Footer />
-      <SectionStreak
-        isOpen={isStreakOpen}
-        onClose={() => setIsStreakOpen(false)}
-      />
+      <SectionStreak />
     </div>
   )
 }

@@ -1,13 +1,14 @@
 "use client"
 
+import { atom, useAtom } from "jotai"
 import { FiX } from "react-icons/fi"
 
-type SectionStreakProps = {
-  isOpen: boolean
-  onClose: () => void
-}
+const atomIsOpen = atom(false)
+export const useStreakSection = () => useAtom(atomIsOpen)
 
-export function SectionStreak({ isOpen, onClose }: SectionStreakProps) {
+export function SectionStreak() {
+  const [isOpen, setIsOpen] = useStreakSection()
+
   if (!isOpen) return null
 
   return (
@@ -18,7 +19,7 @@ export function SectionStreak({ isOpen, onClose }: SectionStreakProps) {
             <h2 className="text-2xl font-bold">Streak</h2>
 
             <button
-              onClick={onClose}
+              onClick={() => setIsOpen(false)}
               aria-label="Close streak"
               className="rounded-full bg-indigo-900/80 p-2 text-white"
             >
@@ -40,16 +41,28 @@ export function SectionStreak({ isOpen, onClose }: SectionStreakProps) {
           </div>
         </div>
 
-        <div className="px-6 py-6">
-          <h3 className="text-xl font-bold">Streak Freeze</h3>
+        <div className="px-6 space-y-5 py-6">
+          <section>
+            <h3 className="text-xl font-bold">Streak Reward</h3>
 
-          <div className="mt-4 rounded-3xl border border-white/20 bg-white/5 p-6">
-            <div className="text-5xl">🧊</div>
-          </div>
+            <div className="mt-4 rounded-3xl border border-white/20 bg-white/5 p-6">
+              <div className="text-5xl">🧊</div>
+            </div>
+          </section>
 
-          <h3 className="mt-7 text-xl font-bold">Activity Calendar</h3>
+          <section>
+            <h3 className="text-xl font-bold">Streak Freeze</h3>
 
-          <div className="h-96 mt-4 rounded-2xl border border-white/15 bg-white/5" />
+            <div className="mt-4 rounded-3xl border border-white/20 bg-white/5 p-6">
+              <div className="text-5xl">🧊</div>
+            </div>
+          </section>
+
+          <section>
+            <h3 className="text-xl font-bold">Activity Calendar</h3>
+
+            <div className="h-96 mt-4 rounded-2xl border border-white/15 bg-white/5" />
+          </section>
         </div>
       </div>
     </section>

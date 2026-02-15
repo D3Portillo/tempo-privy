@@ -1,6 +1,6 @@
 "use client"
 
-import { Fragment, useEffect, useRef, useState } from "react"
+import { Fragment, Suspense, useEffect, useRef, useState } from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { FiCopy } from "react-icons/fi"
 import { toast } from "sonner"
@@ -20,6 +20,14 @@ export const useModalPartnerSync = () => useAtom(atomModalPartnerSync)
 
 const DEFAULT_INVITE_CODE = "WB-AB000000"
 export function ModalPartnerSync() {
+  return (
+    <Suspense fallback={null}>
+      <ModalPartnerSyncContent />
+    </Suspense>
+  )
+}
+
+function ModalPartnerSyncContent() {
   const pathname = usePathname()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -164,7 +172,7 @@ export function ModalPartnerSync() {
             onClick={handleCloseModal}
             className="mt-8 w-full rounded-xl bg-wb-violet p-3 text-sm font-semibold text-white"
           >
-            Setup Streak
+            Setup Streak Reward
           </button>
         </BaseModal>
       )
