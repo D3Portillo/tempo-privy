@@ -8,7 +8,7 @@ import { FaHome, FaGift, FaCalendarAlt, FaHeart } from "react-icons/fa"
 
 const NAV_ITEMS = [
   { href: "/", label: "Home", icon: FaHome },
-  { href: "/treats", label: "Treats", icon: FaGift },
+  { href: "/treats", label: "Gifts", icon: FaGift },
   { href: "/timeline", label: "Memories", icon: FaCalendarAlt },
   { href: "/us", label: "Us", icon: FaHeart },
 ] as const

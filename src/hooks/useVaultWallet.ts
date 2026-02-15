@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/wallet"
 type UseVaultWalletResult = {
   vaultWallet: Address | null
   redeemBalance: (amount: bigint) => Promise<void>
+  isWalletReady: boolean
 }
 
 export function useVaultWallet(): UseVaultWalletResult {
@@ -34,5 +35,6 @@ export function useVaultWallet(): UseVaultWalletResult {
   return {
     vaultWallet,
     redeemBalance,
+    isWalletReady: Boolean(vaultWallet),
   }
 }

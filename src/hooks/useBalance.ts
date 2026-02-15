@@ -1,89 +1,42 @@
-import { alphaUsd } from "@/constants"
-import { useEffect, useState } from "react"
+"use client"
+
+import useSWR from "swr"
+import { Address, formatUnits } from "viem"
 import { Abis } from "tempo.ts/viem"
-import {
-  Address,
-  createPublicClient,
-  defineChain,
-  formatUnits,
-  http,
-} from "viem"
 
-// Define Tempo Moderato chain
-const tempoModerato = defineChain({
-  id: 42431,
-  name: "Tempo Moderato",
-  nativeCurrency: { name: "AlphaUSD", symbol: "aUSD", decimals: 6 },
-  rpcUrls: {
-    default: { http: ["https://rpc.moderato.tempo.xyz"] },
-  },
-  feeToken: alphaUsd,
-})
+import { clientTempo } from "@/lib/chain"
+import { localizeNumber } from "@/lib/number"
+import { alphaUsd } from "@/constants"
 
-const publicClient = createPublicClient({
-  chain: tempoModerato,
-  transport: http("https://rpc.moderato.tempo.xyz"),
-})
-
-export function useBalance(address: string | undefined) {
-  const [balance, setBalance] = useState<string>("0.00")
-  const [loading, setLoading] = useState(true)
-  const [hasInitialFetch, setHasInitialFetch] = useState(false)
-
-  useEffect(() => {
-    if (!address) {
-      setBalance("0.00")
-      setLoading(false)
-      setHasInitialFetch(true)
-      return
-    }
-
-    const fetchBalance = async () => {
-      try {
-        const balance = (await publicClient.readContract({
+export function useBalance(address?: string | null) {
+  const { data: balance = "0", ...query } = useSWR(
+    address ? ["alpha-usd-balance", address] : null,
+    async ([, walletAddress]) => {
+      const [rawBalance, decimals] = await Promise.all([
+        clientTempo.readContract({
           address: alphaUsd,
           abi: Abis.tip20,
           functionName: "balanceOf",
-          args: [address as Address],
-        })) as unknown as bigint
-
-        const decimals = (await publicClient.readContract({
+          args: [walletAddress as Address],
+        }) as Promise<bigint>,
+        clientTempo.readContract({
           address: alphaUsd,
           abi: Abis.tip20,
           functionName: "decimals",
-        })) as unknown as number
+        }) as Promise<number>,
+      ])
 
-        const formatted = formatUnits(balance, decimals)
-        const number = parseFloat(formatted)
+      return localizeNumber(formatUnits(rawBalance, decimals))
+    },
+    {
+      refreshInterval: 10000,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    },
+  )
 
-        // Format with compact notation for large numbers
-        let displayBalance: string
-        if (number >= 1_000_000) {
-          displayBalance = (number / 1_000_000).toFixed(2) + "M"
-        } else if (number >= 1_000) {
-          displayBalance = (number / 1_000).toFixed(2) + "K"
-        } else {
-          displayBalance = number.toFixed(2)
-        }
-
-        setBalance(displayBalance)
-      } catch (error) {
-        console.error("Error fetching balance:", error)
-        setBalance("0.00")
-      } finally {
-        // Only set loading to false after first successful fetch
-        if (!hasInitialFetch) {
-          setLoading(false)
-          setHasInitialFetch(true)
-        }
-      }
-    }
-
-    fetchBalance()
-    const interval = setInterval(fetchBalance, 10000) // Refresh every 10 seconds
-
-    return () => clearInterval(interval)
-  }, [address, hasInitialFetch])
-
-  return { balance, loading }
+  return {
+    ...query,
+    balance: balance == "0" ? "0.00" : balance,
+  }
 }

@@ -14,23 +14,24 @@ import { PiVaultFill } from "react-icons/pi"
 import { applyContainerRules } from "@/lib/utils"
 import { useModalPartnerSync } from "./ModalPartnerSync"
 import { useModalPartnerVault } from "./ModalPartnerVault"
+import { useVaultWallet } from "@/hooks/useVaultWallet"
+import { useBalance } from "@/hooks/useBalance"
+
 import { SectionStreak, useStreakSection } from "./sections/SectionStreak"
 import { IconLogo } from "./icons"
 
-import { useVaultWallet } from "@/hooks/useVaultWallet"
 import AddressBlock from "./AddressBlock"
 
 export function MainLayout({ children }: PropsWithChildren) {
   const [, setIsOpen] = useModalPartnerSync()
-
-  const { isConnected, username, login, logout } = useAuth()
   const [, setIsStreakOpen] = useStreakSection()
   const [, setIsVaultOpen] = useModalPartnerVault()
+
+  const { isConnected, username, login, logout, evmAddress } = useAuth()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
-  const { vaultWallet } = useVaultWallet()
-
-  const hasVault = Boolean(vaultWallet)
+  const { isWalletReady } = useVaultWallet()
+  const { balance } = useBalance(evmAddress)
 
   return (
     <div className={applyContainerRules("min-h-screen pb-24")}>
@@ -50,8 +51,16 @@ export function MainLayout({ children }: PropsWithChildren) {
               className="flex h-8 items-center gap-px rounded-full bg-wb-red/80 px-3 text-white"
             >
               <IoIosFlame className="text-xl text-white" />
-              <span className="text-lg scale-95 font-black">7</span>
+              <span className="text-lg scale-95 font-black">3</span>
             </button>
+
+            <div className="h-8 w-px bg-white/10" />
+
+            <Link href="/wallet" className="flex h-8 items-center text-white">
+              <span className="text-sm tabular-nums font-black">
+                ${balance}
+              </span>
+            </Link>
 
             <button
               onClick={() => setIsDropdownOpen((prev) => !prev)}
@@ -84,7 +93,7 @@ export function MainLayout({ children }: PropsWithChildren) {
                     <span>Invite Partner</span>
                   </button>
 
-                  {hasVault ? (
+                  {isWalletReady ? (
                     <button
                       onClick={() => {
                         setIsDropdownOpen(false)
