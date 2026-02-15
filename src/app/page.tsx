@@ -1,22 +1,29 @@
 "use client"
 
-import { FaCheckCircle } from "react-icons/fa"
-import { useAtom } from "jotai"
-import { MainLayout } from "@/components/MainLayout"
-import MainActions from "@/components/MainActions"
-import { questionCompleteAtom, quizCompleteAtom } from "@/state/streak"
-import { QuestionModal } from "@/components/Question"
-import { QuizModal } from "@/components/Quiz"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import confetti from "canvas-confetti"
+import { useAtom } from "jotai"
+
+import { FaCheckCircle } from "react-icons/fa"
+
+import MainActions from "@/components/MainActions"
+import { QuizModal } from "@/components/Quiz"
+import { MainLayout } from "@/components/MainLayout"
+
+import { questionCompleteAtom, quizCompleteAtom } from "@/state/streak"
+import { QuestionModal } from "@/components/Question"
+
+import { useAuth } from "@/lib/wallet"
 
 export default function Home() {
+  const { isConnected, login } = useAuth()
   const [questionComplete] = useAtom(questionCompleteAtom)
   const [quizComplete] = useAtom(quizCompleteAtom)
   const [showQuestion, setShowQuestion] = useState(false)
   const [showQuiz, setShowQuiz] = useState(false)
   const today = new Date().toISOString().slice(0, 10)
+
   const isQuestionCompleteToday = questionComplete === today
   const isQuizCompleteToday = quizComplete === today
   const isGameCompleteToday = isQuestionCompleteToday && isQuizCompleteToday
@@ -82,7 +89,10 @@ export default function Home() {
                   : "cursor-pointer")
               }
               disabled={isQuestionCompleteToday}
-              onClick={() => setShowQuestion(true)}
+              onClick={() => {
+                if (!isConnected) return login()
+                setShowQuestion(true)
+              }}
             >
               <span className="inline-block px-3 py-1 bg-slate-900 text-white text-sm font-medium rounded-full mb-3">
                 Question
@@ -116,7 +126,10 @@ export default function Home() {
                   : "cursor-pointer")
               }
               disabled={isQuizCompleteToday}
-              onClick={() => setShowQuiz(true)}
+              onClick={() => {
+                if (!isConnected) return login()
+                setShowQuiz(true)
+              }}
             >
               <span className="inline-block px-3 py-1 bg-slate-900 text-white text-sm font-medium rounded-full mb-3">
                 Quiz
