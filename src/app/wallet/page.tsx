@@ -2,19 +2,35 @@
 
 import { useState } from "react"
 import { toast } from "sonner"
+import { formatDistanceToNow } from "date-fns"
 import { createWalletClient, custom, parseUnits, walletActions } from "viem"
 import { tempoActions } from "tempo.ts/viem"
+
+import { useWallets } from "@privy-io/react-auth"
+import { atomWithStorage } from "jotai/utils"
+import { useAtom } from "jotai"
 
 import { MainLayout } from "@/components/MainLayout"
 import { BaseModal } from "@/components/BaseModal"
 import { TopUpModal } from "@/components/TopUpModal"
+import { FiExternalLink } from "react-icons/fi"
 
+import { localizeNumber } from "@/lib/number"
 import { useBalance } from "@/hooks/useBalance"
 import { useVaultWallet } from "@/hooks/useVaultWallet"
 import { useAuth } from "@/lib/wallet"
 import { alphaUsd } from "@/constants"
 import { tempo } from "@/lib/chain"
-import { useWallets } from "@privy-io/react-auth"
+
+const atomHistory = atomWithStorage(
+  "wb.history",
+  [] as Array<{
+    id: string
+    timestamp: number
+    amount: number
+    transactionHash: string
+  }>,
+)
 
 export default function WalletPage() {
   const { evmAddress } = useAuth()
@@ -39,6 +55,8 @@ export default function WalletPage() {
   const [isVaultTipModalOpen, setIsVaultTipModalOpen] = useState(false)
   const [isVaultWithdrawModalOpen, setIsVaultWithdrawModalOpen] =
     useState(false)
+
+  const [txHistory, setTxHistory] = useAtom(atomHistory)
 
   const handleSend = () => {
     if (!sendEmail.trim()) {
@@ -92,13 +110,24 @@ export default function WalletPage() {
       .extend(walletActions)
       .extend(tempoActions())
 
-    const { receipt } = await walletClient.token.transferSync({
+    const transactionHash = await walletClient.token.transfer({
       to: vaultWallet,
       amount: parseUnits(amount.toString(), formattedDecimals),
       token: alphaUsd,
     })
 
-    console.debug({ receipt })
+    console.debug({ transactionHash })
+
+    setTxHistory((prev) => [
+      {
+        id: `tx-${Date.now()}`,
+        timestamp: Date.now(),
+        transactionHash,
+        amount,
+      },
+      ...prev,
+    ])
+
     toast.success(`Added $${amount.toFixed(2)} to Partner Vault`)
     setVaultTipAmount("")
     setIsVaultTipModalOpen(false)
@@ -203,6 +232,51 @@ export default function WalletPage() {
             </button>
           </div>
         </section>
+
+        {txHistory.length > 0 ? (
+          <section className="mt-24">
+            <div className="border-t mb-6 border-white/10" />
+
+            <h2 className="text-2xl font-semibold text-white mb-6">
+              Transaction History
+            </h2>
+
+            <div className="space-y-2">
+              {txHistory.map((tx) => (
+                <article
+                  key={`tx-${tx.id}`}
+                  className="rounded-xl text-white border border-white/10 bg-white/5 px-4 py-3"
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-semibold">Vault Transfer</p>
+
+                      <p className="text-xs first-letter:capitalize text-white/60">
+                        {formatDistanceToNow(new Date(tx.timestamp), {
+                          addSuffix: true,
+                        })}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <p className="text-lg font-bold">
+                        ${localizeNumber(tx.amount)}
+                      </p>
+                      <a
+                        href={`https://explore.tempo.xyz/receipt/${tx.transactionHash}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label="Open transaction"
+                      >
+                        <FiExternalLink className="text-lg" />
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
 
       <BaseModal
