@@ -17,6 +17,7 @@ export default function WalletPage() {
 
   const { balance: walletBalance } = useBalance(evmAddress)
   const { balance: vaultBalance } = useBalance(vaultWallet)
+
   const [vaultBalanceDemo, setVaultBalanceDemo] = useState(0)
   const [isVaultBalanceDemoReady, setIsVaultBalanceDemoReady] = useState(false)
 
@@ -75,11 +76,7 @@ export default function WalletPage() {
   const handleVaultWithdraw = () => {
     const amount = Number(vaultWithdrawAmount)
 
-    if (
-      !vaultWithdrawAmount.trim() ||
-      Number.isNaN(amount) ||
-      amount <= 0
-    ) {
+    if (!vaultWithdrawAmount.trim() || Number.isNaN(amount) || amount <= 0) {
       toast.error("Add a valid amount")
       return
     }

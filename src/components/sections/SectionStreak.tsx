@@ -97,7 +97,9 @@ export function SectionStreak() {
                 🔥
               </div>
               <div>
-                <p className="text-2xl font-black">{streakCount} day{streakCount === 1 ? '' : 's'}</p>
+                <p className="text-2xl font-black">
+                  {streakCount} day{streakCount === 1 ? "" : "s"}
+                </p>
                 <p className="mt-1 text-sm text-indigo-900/80">
                   Well done for investing in your relationship today!
                 </p>
@@ -276,20 +278,16 @@ export function SectionStreak() {
             <section>
               <h3 className="text-xl font-bold">Activity Calendar</h3>
               <div className="mt-4 rounded-2xl border border-white/15 bg-white/5 p-4">
-                <p className="text-sm font-semibold text-white/90">February 2026</p>
+                <p className="text-sm font-semibold text-white/90">
+                  February 2026
+                </p>
 
                 <div className="mt-3 grid grid-cols-7 gap-2 text-center text-[11px] uppercase tracking-wide text-white/60">
-                  {[
-                    "Sun",
-                    "Mon",
-                    "Tue",
-                    "Wed",
-                    "Thu",
-                    "Fri",
-                    "Sat",
-                  ].map((day) => (
-                    <span key={day}>{day}</span>
-                  ))}
+                  {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(
+                    (day) => (
+                      <span key={day}>{day}</span>
+                    ),
+                  )}
                 </div>
 
                 <div className="mt-2 grid grid-cols-7 gap-2">

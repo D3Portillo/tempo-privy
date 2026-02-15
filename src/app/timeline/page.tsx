@@ -1,6 +1,7 @@
 "use client"
 
 import { MainLayout } from "@/components/MainLayout"
+import { cn } from "@/lib/utils"
 import { useMemoryLikes } from "@/state/memories"
 import { IoHeart } from "react-icons/io5"
 
@@ -46,9 +47,9 @@ export default function TimelinePage() {
             <div className="aspect-square">
               <img
                 src={photo.src}
-                alt={`Memory ${photo.id}`}
                 loading="lazy"
-                className="h-full w-full object-cover"
+                className="size-full object-cover"
+                alt=""
               />
             </div>
 
@@ -56,12 +57,12 @@ export default function TimelinePage() {
               <button
                 type="button"
                 onClick={() => toggleLike(photo.id)}
-                className={
-                  "grid size-8 place-items-center rounded-full backdrop-blur active:scale-98 transition-transform " +
-                  (likes[photo.id]
-                    ? "bg-rose-500/90 text-white"
-                    : "bg-black/40 text-white/85")
-                }
+                className={cn(
+                  "grid size-8 place-items-center rounded-full backdrop-blur active:scale-95 transition",
+                  likes[photo.id]
+                    ? "bg-red-700/90 text-white"
+                    : "bg-black/40 text-white/85",
+                )}
                 aria-label="Like memory"
               >
                 <IoHeart className="text-base" />

@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { Fragment, useState, type PropsWithChildren } from "react"
+import { useRouter } from "next/navigation"
 
 import { useAuth } from "@/lib/wallet"
 import { Footer } from "@/components/Footer"
@@ -10,6 +11,7 @@ import { IoIosFlame } from "react-icons/io"
 import { FiLogOut } from "react-icons/fi"
 import { BsFillArrowThroughHeartFill } from "react-icons/bs"
 import { PiVaultFill } from "react-icons/pi"
+import { RiMoneyDollarBoxFill } from "react-icons/ri"
 
 import { applyContainerRules } from "@/lib/utils"
 import { useModalPartnerSync } from "./ModalPartnerSync"
@@ -24,6 +26,8 @@ import { IconLogo } from "./icons"
 import AddressBlock from "./AddressBlock"
 
 export function MainLayout({ children }: PropsWithChildren) {
+  const router = useRouter()
+
   const [, setIsOpen] = useModalPartnerSync()
   const [, setIsStreakOpen] = useStreakSection()
   const [streakCount] = useStreakCount()
@@ -107,6 +111,17 @@ export function MainLayout({ children }: PropsWithChildren) {
                       <span>Partner Vault</span>
                     </button>
                   ) : null}
+
+                  <button
+                    onClick={() => {
+                      setIsDropdownOpen(false)
+                      router.push("/wallet")
+                    }}
+                    className="mt-1 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-medium text-white transition hover:bg-white/10"
+                  >
+                    <RiMoneyDollarBoxFill className="text-amber-300 text-base" />
+                    <span>My Wallet</span>
+                  </button>
 
                   <button
                     onClick={() => {

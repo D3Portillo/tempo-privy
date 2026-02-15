@@ -19,7 +19,7 @@ export function Footer() {
   return (
     <nav
       className={applyContainerRules(
-        "fixed sm:rounded-t-4xl bottom-0 left-1/2 border-t-2 border-white/10 drop-shadow-lg -translate-x-1/2 bg-[#0b1a3d] px-6 pt-5 pb-4",
+        "fixed z-1 sm:rounded-t-4xl bottom-0 left-1/2 border-t-2 border-white/10 drop-shadow-lg -translate-x-1/2 bg-[#0b1a3d] px-4 pt-5 pb-4",
       )}
     >
       <div className="flex items-center justify-around">
@@ -31,7 +31,7 @@ export function Footer() {
               key={`nav-item-${href}`}
               href={href}
               className={cn(
-                "flex flex-col items-center gap-1",
+                "flex px-5 flex-col items-center gap-1",
                 isActive ? "text-purple-200" : "text-white/50",
               )}
             >
