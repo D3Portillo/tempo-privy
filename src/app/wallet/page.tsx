@@ -1,13 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
 
 import { MainLayout } from "@/components/MainLayout"
 import { BaseModal } from "@/components/BaseModal"
 import { TopUpModal } from "@/components/TopUpModal"
 
-import { useModalPartnerVault } from "@/components/ModalPartnerVault"
 import { useBalance } from "@/hooks/useBalance"
 import { useVaultWallet } from "@/hooks/useVaultWallet"
 import { useAuth } from "@/lib/wallet"
@@ -15,14 +14,32 @@ import { useAuth } from "@/lib/wallet"
 export default function WalletPage() {
   const { evmAddress } = useAuth()
   const { vaultWallet, isWalletReady } = useVaultWallet()
-  const [, setIsVaultOpen] = useModalPartnerVault()
 
   const { balance: walletBalance } = useBalance(evmAddress)
   const { balance: vaultBalance } = useBalance(vaultWallet)
+  const [vaultBalanceDemo, setVaultBalanceDemo] = useState(0)
+  const [isVaultBalanceDemoReady, setIsVaultBalanceDemoReady] = useState(false)
 
   const [sendEmail, setSendEmail] = useState("")
+  const [sendAmount, setSendAmount] = useState("")
+  const [vaultTipAmount, setVaultTipAmount] = useState("")
+  const [vaultWithdrawAmount, setVaultWithdrawAmount] = useState("")
+  const [vaultWithdrawReason, setVaultWithdrawReason] = useState("")
   const [isSendModalOpen, setIsSendModalOpen] = useState(false)
   const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false)
+  const [isVaultTipModalOpen, setIsVaultTipModalOpen] = useState(false)
+  const [isVaultWithdrawModalOpen, setIsVaultWithdrawModalOpen] =
+    useState(false)
+
+  useEffect(() => {
+    if (isVaultBalanceDemoReady) return
+
+    const parsedVaultBalance = Number(vaultBalance.replaceAll(",", ""))
+    if (!Number.isNaN(parsedVaultBalance)) {
+      setVaultBalanceDemo(parsedVaultBalance)
+      setIsVaultBalanceDemoReady(true)
+    }
+  }, [vaultBalance, isVaultBalanceDemoReady])
 
   const handleSend = () => {
     if (!sendEmail.trim()) {
@@ -30,9 +47,58 @@ export default function WalletPage() {
       return
     }
 
-    toast.success(`Send flow started for ${sendEmail.trim()}`)
+    if (!sendAmount.trim() || Number(sendAmount) <= 0) {
+      toast.error("Add a valid amount")
+      return
+    }
+
+    toast.success(`Sent $${sendAmount.trim()} to ${sendEmail.trim()}`)
     setSendEmail("")
+    setSendAmount("")
     setIsSendModalOpen(false)
+  }
+
+  const handleVaultTip = () => {
+    const amount = Number(vaultTipAmount)
+
+    if (!vaultTipAmount.trim() || Number.isNaN(amount) || amount <= 0) {
+      toast.error("Add a valid amount")
+      return
+    }
+
+    setVaultBalanceDemo((prev) => prev + amount)
+    toast.success(`Added $${amount.toFixed(2)} to Partner Vault`)
+    setVaultTipAmount("")
+    setIsVaultTipModalOpen(false)
+  }
+
+  const handleVaultWithdraw = () => {
+    const amount = Number(vaultWithdrawAmount)
+
+    if (
+      !vaultWithdrawAmount.trim() ||
+      Number.isNaN(amount) ||
+      amount <= 0
+    ) {
+      toast.error("Add a valid amount")
+      return
+    }
+
+    if (amount > vaultBalanceDemo) {
+      toast.error("Insufficient Partner Vault balance")
+      return
+    }
+
+    if (!vaultWithdrawReason.trim()) {
+      toast.error("Add a reason for withdrawal")
+      return
+    }
+
+    setVaultBalanceDemo((prev) => prev - amount)
+    toast.success("Withdraw request sent")
+    setVaultWithdrawAmount("")
+    setVaultWithdrawReason("")
+    setIsVaultWithdrawModalOpen(false)
   }
 
   return (
@@ -84,7 +150,7 @@ export default function WalletPage() {
                 PARTNER VAULT
               </p>
               <p className="mt-2 text-4xl font-black text-white">
-                ${vaultBalance}
+                ${vaultBalanceDemo.toFixed(2)}
               </p>
             </div>
             <div className="grid size-12 place-items-center rounded-2xl bg-white/10 text-2xl">
@@ -99,7 +165,7 @@ export default function WalletPage() {
           <div className="mt-5 grid gap-2">
             <button
               type="button"
-              onClick={() => setIsVaultOpen(true)}
+              onClick={() => setIsVaultTipModalOpen(true)}
               className="rounded-xl bg-wb-green px-3 py-3 text-sm font-semibold text-black"
             >
               Tip / Add Money
@@ -107,7 +173,7 @@ export default function WalletPage() {
 
             <button
               type="button"
-              onClick={() => setIsVaultOpen(true)}
+              onClick={() => setIsVaultWithdrawModalOpen(true)}
               disabled={!isWalletReady}
               className="rounded-xl border border-white/20 bg-white/10 px-3 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -140,9 +206,106 @@ export default function WalletPage() {
             className="mt-2 w-full rounded-xl border border-white/20 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/40"
           />
 
+          <label
+            htmlFor="send-amount"
+            className="mt-4 block text-xs uppercase tracking-wide text-white/60"
+          >
+            Amount
+          </label>
+
+          <input
+            id="send-amount"
+            type="text"
+            value={sendAmount}
+            onChange={(event) => setSendAmount(event.target.value)}
+            placeholder="0.00"
+            className="mt-2 w-full rounded-xl border border-white/20 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/40"
+          />
+
           <button
             type="button"
             onClick={handleSend}
+            className="mt-5 w-full rounded-xl bg-wb-violet p-3 text-sm font-semibold text-white"
+          >
+            Confirm
+          </button>
+        </div>
+      </BaseModal>
+
+      <BaseModal
+        ariaLabel="Tip / Add money"
+        title="Tip / Add money"
+        isOpen={isVaultTipModalOpen}
+        onClose={() => setIsVaultTipModalOpen(false)}
+      >
+        <div className="mt-4">
+          <label
+            htmlFor="vault-tip-amount"
+            className="text-xs uppercase tracking-wide text-white/60"
+          >
+            Amount
+          </label>
+
+          <input
+            id="vault-tip-amount"
+            type="text"
+            value={vaultTipAmount}
+            onChange={(event) => setVaultTipAmount(event.target.value)}
+            placeholder="0.00"
+            className="mt-2 w-full rounded-xl border border-white/20 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/40"
+          />
+
+          <button
+            type="button"
+            onClick={handleVaultTip}
+            className="mt-5 w-full rounded-xl bg-wb-violet p-3 text-sm font-semibold text-white"
+          >
+            Confirm
+          </button>
+        </div>
+      </BaseModal>
+
+      <BaseModal
+        ariaLabel="Withdraw funds"
+        title="Withdraw funds"
+        isOpen={isVaultWithdrawModalOpen}
+        onClose={() => setIsVaultWithdrawModalOpen(false)}
+      >
+        <div className="mt-4">
+          <label
+            htmlFor="vault-withdraw-amount"
+            className="text-xs uppercase tracking-wide text-white/60"
+          >
+            Amount
+          </label>
+
+          <input
+            id="vault-withdraw-amount"
+            type="text"
+            value={vaultWithdrawAmount}
+            onChange={(event) => setVaultWithdrawAmount(event.target.value)}
+            placeholder="0.00"
+            className="mt-2 w-full rounded-xl border border-white/20 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/40"
+          />
+
+          <label
+            htmlFor="vault-withdraw-reason"
+            className="mt-4 block text-xs uppercase tracking-wide text-white/60"
+          >
+            Reason for withdrawal
+          </label>
+
+          <textarea
+            id="vault-withdraw-reason"
+            value={vaultWithdrawReason}
+            onChange={(event) => setVaultWithdrawReason(event.target.value)}
+            placeholder="What is this withdrawal for?"
+            className="mt-2 min-h-24 w-full rounded-xl border border-white/20 bg-white/5 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/40"
+          />
+
+          <button
+            type="button"
+            onClick={handleVaultWithdraw}
             className="mt-5 w-full rounded-xl bg-wb-violet p-3 text-sm font-semibold text-white"
           >
             Confirm
